@@ -7,6 +7,7 @@
 #include "./grid.h"
 #include "./init.h"
 #include "./eos.h"
+#include <complex>
 
 #ifndef _OPENMP
   #define omp_get_thread_num() 0
@@ -125,6 +126,9 @@ void Init::InitTJb(SCGrid &arena_prev, SCGrid &arena_current) {
         // code test in 1+1 D vs Monnai's results
         music_message.info(" Perform 1+1D test vs Monnai's results... ");
         initial_1p1D_eta(arena_prev, arena_current);
+    } else if (DATA.Initial_profile == 3) {
+        music_message.info(" Deformed Gaussian initial condition");
+	initial_distorted_Gaussian(arena_prev, arena_current);
     } else if (DATA.Initial_profile == 8) {
         // read in the profile from file
         // - IPGlasma initial conditions with initial flow
@@ -188,6 +192,7 @@ void Init::InitTJb(SCGrid &arena_prev, SCGrid &arena_current) {
     } else if (DATA.Initial_profile == 101) {
         initial_UMN_with_rhob(arena_prev, arena_current);
     }
+    output_2D_eccentricities(0, arena_current);
     music_message.info("initial distribution done.");
 }
 
@@ -671,6 +676,59 @@ void Init::initial_MCGlb_with_rhob_XY(int ieta, SCGrid &arena_prev,
     }
 }
 
+void Init::initial_distorted_Gaussian(SCGrid &arena_prev,
+                                           SCGrid &arena_current) {
+	// initial condition is a 2D Gaussian in the transverse plane, deformed to obtain an arbitrary anisotropy
+    const int nx = arena_current.nX();
+    const int ny = arena_current.nY();
+    double u[4] = {1.0, 0.0, 0.0, 0.0};
+    for (int ix = 0; ix < nx; ix++) {
+	double x = DATA.delta_x*(ix*2.0 - DATA.nx)/2.0;		
+        for (int iy = 0; iy < ny; iy++) {
+	    double y = DATA.delta_y*(iy*2.0 - DATA.ny)/2.0;		
+            for (int ieta = 0; ieta < arena_current.nEta(); ieta++) {
+//    		double eta = (DATA.delta_eta)*ieta - (DATA.eta_size)/2.0;
+
+		double phi = atan2(y,x);
+		double Rgauss = 3.0; //in fm
+		int nharmonics = 7; //number of harmonics to include in deformation
+		double ecc[nharmonics] = {0,0.3,0,0,0,0,0};
+		double psi[nharmonics] = {0,0,0,0,0,0,0};
+		double r2 = x*x+y*y;
+		double stretch = 1.0;
+		for(int n = 0; n < nharmonics; n++) {
+			stretch += ecc[n]*cos(n*phi - n*psi[n]);
+		}
+		double epsilon = 50*exp(-r2*stretch/(2*Rgauss*Rgauss));
+		epsilon = max(epsilon, 1e-11);
+            	arena_current(ix, iy, ieta).epsilon = epsilon;
+//            	arena_current(ix, iy, ieta).rhob = 0.0;
+//            	Can also include an initial transverse flow.  Choose the flow vector to always be in the radial direction, but with a magnitude obtained from a derivative of the deformed Gaussian above.
+
+		double eccU[nharmonics] = {0,0.3,0,0,0,0,0};
+		double psiU[nharmonics] = {0,0,0,0,0,0,0};
+		double stretchU = 1.0;
+		for(int n = 0; n < nharmonics; n++) {
+			stretchU += eccU[n]*cos(n*phi - n*psiU[n]);
+		}
+            	u[3] = 0.0;  // boost invariant flow profile
+		u[1] = 0.2*0.2*stretchU*2*x/(2*Rgauss*Rgauss)*DATA.tau0;
+		u[2] = 0.2*0.2*stretchU*2*y/(2*Rgauss*Rgauss)*DATA.tau0;
+		//u[1] = 0.04*0.03*4/3/epsilon*exp(-(x*x+y*y)*stretchU/(2*Rgauss*Rgauss))*cos(phi);
+		//u[2] = 0.04*0.03*4/3/epsilon*exp(-(x*x+y*y)*stretchU/(2*Rgauss*Rgauss))*sin(phi);
+		u[1] = 0;
+		u[2] = 0;
+            	arena_current(ix, iy, ieta).u[0] = u[0];
+            	arena_current(ix, iy, ieta).u[1] = u[1];
+            	arena_current(ix, iy, ieta).u[2] = u[2];
+            	arena_current(ix, iy, ieta).u[3] = u[3];
+            
+            	arena_prev(ix, iy, ieta) = arena_current(ix, iy, ieta);
+	    }
+        }
+    }
+}
+
 void Init::initial_MCGlbLEXUS_with_rhob_XY(int ieta, SCGrid &arena_prev,
                                            SCGrid &arena_current) {
     const int nx = arena_current.nX();
@@ -693,7 +751,6 @@ void Init::initial_MCGlbLEXUS_with_rhob_XY(int ieta, SCGrid &arena_prev,
         }
     }
 }
-
 
 void Init::initial_UMN_with_rhob(SCGrid &arena_prev, SCGrid &arena_current) {
     // first load in the transverse profile
@@ -934,3 +991,52 @@ void Init::output_initial_density_profiles(SCGrid &arena) {
     }
     music_message.info("done!");
 }
+
+void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
+    // this function outputs a set of eccentricities (cumulants) to a file
+    music_message.info("output initial eccentricities into a file... ");
+    ofstream of("ecc.dat");
+    int zmax = 12;
+    std::complex<double> eps[zmax][zmax] = {{0}}; // moment <z^j z*^k> =  <r^(j+k) e^{i(j-k)\phi}>
+    std::complex<double> epsU[zmax][zmax] = {{0}}; //
+    std::complex<double> epsUbar[zmax][zmax] = {{0}}; //
+//    of << "# x(fm)  y(fm)  eta  ed(GeV/fm^3)";
+//    of << endl;
+	for(int ix = 0; ix < arena.nX(); ix++) {
+	    double x = -DATA.x_size/2. + ix*DATA.delta_x;
+	    for(int iy = 0; iy < arena.nY(); iy++) {
+		double y = -DATA.y_size/2. + iy*DATA.delta_y;
+		std::complex<double> z (x,y);
+		std::complex<double> zbar = conj(z);
+		double e = arena(ix,iy,ieta).epsilon; // need to define e as T^tautau and similarly with the momentum density for U.  Fix it later.
+		std::complex<double> U (arena(ix,iy,ieta).u[1],arena(ix,iy,ieta).u[2]);
+		for(int j=0; j < zmax; j++) {
+		    for(int k=0; k < zmax; k++) {
+			eps[j][k] += e*pow(z,j)*pow(zbar,k); 
+			epsU[j][k] += U*pow(z,j)*pow(zbar,k); 
+			epsUbar[j][k] += conj(U)*pow(z,j)*pow(zbar,k); 
+		    }
+		}
+	    }
+	}
+	// Define the cumulants by hand
+	for(int j=0; j < zmax; j++) {
+	    for(int k=0; k < zmax; k++) {
+		if(!(j==0 && k==0)) {
+		    eps[j][k] /= eps[0][0];
+		    epsU[j][k] /= eps[0][0];
+		    epsUbar[j][k] /= eps[0][0];
+		}
+	    }
+	}
+	
+	complex<double> W11 = eps[1][0];
+	complex<double> W02 = eps[1][1];
+	complex<double> W22 = eps[2][0] - W11*W11;
+	complex<double> W13 = eps[2][1] - eps[2][0]*eps[0][-1] 
+	    - 2.0*eps[1][1]*eps[1][0] + 2.0*eps[1][0]*eps[1][0]*eps[0][1];
+	complex<double> W33 = eps[3][0] + eps[1][0]*(3.0*eps[2][0] - 2.0*eps[1][0]*eps[1][0]);
+	cout << "eps2 = " << abs(W22/W02) << endl;
+	cout << "eps3 = " << abs(W33/pow(W02,1.5)) << endl;
+	cout << "eps1 = " << abs(W13/pow(W02,1.5)) << endl;
+    }

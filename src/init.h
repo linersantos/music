@@ -34,6 +34,7 @@ class Init {
     void initial_IPGlasma_XY_with_pi     (int ieta, SCGrid &arena_prev, SCGrid &arena_current);
     void initial_MCGlb_with_rhob_XY      (int ieta, SCGrid &arena_prev, SCGrid &arena_current);
     void initial_MCGlbLEXUS_with_rhob_XY (int ieta, SCGrid &arena_prev, SCGrid &arena_current);
+    void initial_distorted_Gaussian (SCGrid &arena_prev, SCGrid &arena_current);
     void initial_AMPT_XY                 (int ieta, SCGrid &arena_prev, SCGrid &arena_current);
     void initial_UMN_with_rhob           (SCGrid &arena_prev, SCGrid & arena_current);
     
@@ -44,6 +45,7 @@ class Init {
     double eta_rhob_left_factor            (double eta);
     double eta_rhob_right_factor           (double eta);
     void   output_initial_density_profiles (SCGrid &arena);
+    void   output_2D_eccentricities (int ieta, SCGrid &arena);
 };
 
 #endif  // SRC_INIT_H_
