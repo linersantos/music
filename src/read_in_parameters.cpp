@@ -769,6 +769,21 @@ InitData read_in_parameters(std::string input_file) {
         istringstream(tempinput) >> temp_dNdyptdpt_eta_max;
     parameter_list.dNdyptdpt_eta_max = temp_dNdyptdpt_eta_max;
 
+
+
+    // tolerance for copying spectra -- particles with almost the same mass and chemical potential don't need to be recalculated
+    // When tolerances are set to zero, results are exact -- only particles with exactly the same mass and (PCE, baryon) chemical potential are copied
+    double tempMassTolerance = 1e-5; // maximum fractional difference in mass.  This value reduces the number of particles calculated from 319 to 99.
+    tempinput = Util::StringFind4(input_file, "MassTolerance");
+    if(tempinput != "empty") istringstream ( tempinput ) >> tempMassTolerance;
+    parameter_list.MassTolerance = tempMassTolerance;
+
+    // tolerance for PCE chemical potential.  
+    double tempMuTolerance = 1e-2; 
+    tempinput = Util::StringFind4(input_file, "MuTolerance");
+    if(tempinput != "empty") istringstream ( tempinput ) >> tempMuTolerance;
+    parameter_list.MuTolerance = tempMuTolerance;
+
     music_message.info("Done read_in_parameters.");
     check_parameters(parameter_list, input_file);
 

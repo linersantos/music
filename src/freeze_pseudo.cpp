@@ -913,12 +913,19 @@ void Freeze::OutputFullParticleSpectrum_pseudo(InitData *DATA, int number,
 //! this function computes particle thermal spectra
 void Freeze::compute_thermal_spectra(int particleSpectrumNumber,
                                      InitData* DATA) {
-    double mass_tol = 1e-3;
-    double mu_tol = 1e-3;
+//    double mass_tol = 1e-1; //tolerance on relative mass
+    double mass_tol = DATA->MassTolerance;
+    cout << "MassTolerance = " << mass_tol << endl;
+//    double mu_tol = 1e-1;
+    double mu_tol = DATA->MuTolerance;
+    cout << "MuTolerance = " << mu_tol << endl;
+    int copyflag[319] = {0};
 
     // clean up
-    system("rm yptphiSpectra.dat yptphiSpectra?.dat "
-           "yptphiSpectra??.dat particleInformation.dat 2> /dev/null");
+    remove("yptphiSpectra.dat");
+    remove("particleInformation.dat");
+//    system("rm yptphiSpectra.dat yptphiSpectra?.dat "
+//           "yptphiSpectra??.dat particleInformation.dat 2> /dev/null");
 
     ReadFreezeOutSurface(DATA);  // read freeze out surface
     if (particleSpectrumNumber == 0) {
@@ -933,13 +940,18 @@ void Freeze::compute_thermal_spectra(int particleSpectrumNumber,
             // Only calculate particles with unique mass
             for(int part = 1; part < i; part++) {
                 double mass_diff = fabs(particleList[i].mass
-                                        - particleList[part].mass);
-                double mu_diff = fabs(particleList[i].muAtFreezeOut
-                                      - particleList[part].muAtFreezeOut);
+                                        - particleList[part].mass)/particleList[i].mass;
+                double mu_diff = 0.0;
+		if(particleList[i].muAtFreezeOut != 0.0) 
+		    mu_diff = fabs(particleList[i].muAtFreezeOut
+                                      - particleList[part].muAtFreezeOut)/particleList[i].muAtFreezeOut;
                 if (mass_diff < mass_tol && mu_diff < mu_tol
                     && (DATA->turn_on_rhob == 0
                         || particleList[i].baryon == particleList[part].baryon)
-                   ) {
+		    && copyflag[part] == 0
+		   )
+		{
+		    copyflag[i] = 1;
                     // here we assume zero mu_B
                     computespectrum = 0;
 
@@ -1010,9 +1022,9 @@ void Freeze::compute_thermal_spectra(int particleSpectrumNumber,
                     ComputeParticleSpectrum_pseudo_improved(DATA, number);
                 }
 
-                system("cat yptphiSpectra?.dat >> yptphiSpectra.dat");
-                system("cat yptphiSpectra??.dat >> yptphiSpectra.dat "
-                       "2> /dev/null");
+//                system("cat yptphiSpectra?.dat >> yptphiSpectra.dat");
+//                system("cat yptphiSpectra??.dat >> yptphiSpectra.dat "
+//                       "2> /dev/null");
             }
         }
     } else {
@@ -1031,9 +1043,9 @@ void Freeze::compute_thermal_spectra(int particleSpectrumNumber,
             ComputeParticleSpectrum_pseudo_improved(DATA, number);
         }
     
-        system("cat yptphiSpectra?.dat >> yptphiSpectra.dat");
-        system("cat yptphiSpectra??.dat >> yptphiSpectra.dat "
-               "2> /dev/null");
+//        system("cat yptphiSpectra?.dat >> yptphiSpectra.dat");
+//        system("cat yptphiSpectra??.dat >> yptphiSpectra.dat "
+//               "2> /dev/null");
     }
     free(surface);
 }
@@ -1051,7 +1063,9 @@ void Freeze::perform_resonance_decays(InitData *DATA) {
 
     cal_reso_decays(particleMax, decayMax, bound);
 
-    system("rm FyptphiSpectra.dat FparticleInformation.dat 2> /dev/null");
+//    system("rm FyptphiSpectra.dat FparticleInformation.dat 2> /dev/null");
+    remove("FyptphiSpectra");
+    remove("FparticleInformation.dat");
     for (int i = 1; i < particleMax; i++) {
         int number = particleList[i].number;
         int b = particleList[i].baryon;
@@ -1158,10 +1172,46 @@ void Freeze::CooperFrye_pseudo(int particleSpectrumNumber, int mode,
         perform_resonance_decays(DATA);
     } 
     if (mode==13 || mode == 3 || mode == 1) {
-        compute_thermal_particle_spectra_and_vn(DATA);
+//        compute_thermal_particle_spectra_and_vn(DATA);
+//        get_vn(DATA, pT_min, pT_max, 0, eta_min, eta_max, iorder, vn_temp);
+        double *vn_temp = new double [2];
+	double pT_min = 0.1;
+	double pT_max = 3.0;
+	double eta_min = 0.0;
+	double eta_max = 0.0;
+        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 2, vn_temp);
+	cout << "v2 = " << vn_temp[0] << endl;;
+        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 3, vn_temp);
+	cout << "v3 = " << vn_temp[0] << endl;;
+        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 4, vn_temp);
+	cout << "v4 = " << vn_temp[0] << endl;;
+        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 5, vn_temp);
+	cout << "v5 = " << vn_temp[0] << endl;;
+        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 6, vn_temp);
+	cout << "v6 = " << vn_temp[0] << endl;;
+        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 7, vn_temp);
+	cout << "v7 = " << vn_temp[0] << endl;;
     } 
     if (mode==14 || mode == 4 || mode == 1) {
-        compute_final_particle_spectra_and_vn(DATA);
+	cout << "After resonance decay:\n";
+        double *vn_tempF = new double [2];
+	double pT_minF = 0.1;
+	double pT_maxF = 3.0;
+	double eta_minF = 0.0;
+	double eta_maxF = 0.0;
+        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 2, vn_tempF);
+	cout << "v2 = " << vn_tempF[0] << endl;;
+        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 3, vn_tempF);
+	cout << "v3 = " << vn_tempF[0] << endl;;
+        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 4, vn_tempF);
+	cout << "v4 = " << vn_tempF[0] << endl;;
+        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 5, vn_tempF);
+	cout << "v5 = " << vn_tempF[0] << endl;;
+        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 6, vn_tempF);
+	cout << "v6 = " << vn_tempF[0] << endl;;
+        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 7, vn_tempF);
+	cout << "v7 = " << vn_tempF[0] << endl;;
+//        compute_final_particle_spectra_and_vn(DATA);
     } 
 
     // clean up

@@ -189,6 +189,10 @@ typedef struct init_data {
     double dNdyptdpt_eta_min;
     double dNdyptdpt_eta_max;
 
+    // tolerances for copying spectra from already-calculated particles with similar mass and chemical potential
+    double MassTolerance;
+    double MuTolerance;
+
 } InitData;
 
 #endif  // SRC_DATA_H_
