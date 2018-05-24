@@ -11,13 +11,13 @@
 
 //! This is a data structure contains all the parameters for simulation
 typedef struct init_data {
-  
-    std::array<std::array<double, 4>, 4> gmunu = 
-      {{{-1,0,0,0},
-        { 0,1,0,0},
-        { 0,0,1,0},
-        { 0,0,0,1}}};
-        
+
+    std::array<std::array<double, 4>, 4> gmunu =
+      {{ {{-1,0,0,0}},
+        {{ 0,1,0,0}},
+        {{ 0,0,1,0}},
+        {{ 0,0,0,1}} }};
+
     int echo_level;
     int mode;               //!< 1: do everything;
     //!< 2: do hydro evolution only;
@@ -32,7 +32,7 @@ typedef struct init_data {
     std::string initName_rhob_TA;
     std::string initName_rhob_TB;
     std::string initName_AMPT;
-    
+
     //! random seed
     int seed;
     double ecm;
@@ -49,7 +49,7 @@ typedef struct init_data {
     double eta_rhob_plateau_height;  //!< central plateau height profile == 2
     double eta_rhob_width_1;         //!< outside tail Gaussian width profile == 2
     double eta_rhob_width_2;         //!< inside Gaussian width profile == 2
-    
+
     int Initial_profile;    //! type of initial condition
     int initializeEntropy;  //! flag to initial entropy or energy density
 
@@ -75,7 +75,7 @@ typedef struct init_data {
 
     int rk_order;
     double minmod_theta;
-    
+
     double sFactor;     //!< overall normalization on energy density profile
     int whichEOS;       //!< type of EoS
     int check_eos;      //!< flag to output files to check EoS

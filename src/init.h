@@ -28,6 +28,7 @@ class Init {
                    SCGrid &arena_future);
     void InitTJb  (SCGrid &arena_prev, SCGrid &arena_current);
 
+    void initial_trento_XY               (int ieta, SCGrid &arena_prev, SCGrid &arena_current); 
     void initial_Gubser_XY               (int ieta, SCGrid &arena_prev, SCGrid &arena_current);
     void initial_1p1D_eta                (SCGrid &arena_prev, SCGrid &arena_current);
     void initial_IPGlasma_XY             (int ieta, SCGrid &arena_prev, SCGrid &arena_current);

@@ -6,6 +6,7 @@
 results/
 obj/
 tests/
+build/
 *.pyc
 *.txt
 mpihydro
