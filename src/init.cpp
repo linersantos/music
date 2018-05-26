@@ -745,21 +745,21 @@ void Init::initial_distorted_Gaussian(SCGrid &arena_prev,
     const int ny = arena_current.nY();
     double u[4] = {1.0, 0.0, 0.0, 0.0};
     for (int ix = 0; ix < nx; ix++) {
-	double x = DATA.delta_x*(ix*2.0 - DATA.nx)/2.0;
+	double x = DATA.delta_x*(ix*2.0 - nx)/2.0;
         for (int iy = 0; iy < ny; iy++) {
-	    double y = DATA.delta_y*(iy*2.0 - DATA.ny)/2.0;
+	    double y = DATA.delta_y*(iy*2.0 - ny)/2.0;
             for (int ieta = 0; ieta < arena_current.nEta(); ieta++) {
 //    		double eta = (DATA.delta_eta)*ieta - (DATA.eta_size)/2.0;
 
 		double phi = atan2(y,x);
 		double Rgauss = 3.0; //in fm
 		int nharmonics = 7; //number of harmonics to include in deformation
-		double ecc[nharmonics] = {0,0.3,0,0,0,0,0};
+		double ecc[nharmonics] = {0,0,0,0,0,0,0};
 		double psi[nharmonics] = {0,0,0,0,0,0,0};
 		double r2 = x*x+y*y;
 		double stretch = 1.0;
-		for(int n = 0; n < nharmonics; n++) {
-			stretch += ecc[n]*cos(n*phi - n*psi[n]);
+		for(int n = 1; n <= nharmonics; n++) {
+			stretch += ecc[n-1]*cos(n*phi - n*psi[n-1]);
 		}
 		double epsilon = 50*exp(-r2*stretch/(2*Rgauss*Rgauss));
 		epsilon = max(epsilon, 1e-11);
@@ -767,19 +767,21 @@ void Init::initial_distorted_Gaussian(SCGrid &arena_prev,
 //            	arena_current(ix, iy, ieta).rhob = 0.0;
 //            	Can also include an initial transverse flow.  Choose the flow vector to always be in the radial direction, but with a magnitude obtained from a derivative of the deformed Gaussian above.
 
-		double eccU[nharmonics] = {0,0.3,0,0,0,0,0};
+		double eccU[nharmonics] = {0,0.0,0,0,0,0,0};
 		double psiU[nharmonics] = {0,0,0,0,0,0,0};
 		double stretchU = 1.0;
 		for(int n = 0; n < nharmonics; n++) {
 			stretchU += eccU[n]*cos(n*phi - n*psiU[n]);
 		}
             	u[3] = 0.0;  // boost invariant flow profile
-		u[1] = 0.2*0.2*stretchU*2*x/(2*Rgauss*Rgauss)*DATA.tau0;
-		u[2] = 0.2*0.2*stretchU*2*y/(2*Rgauss*Rgauss)*DATA.tau0;
+//		u[1] = 0.2*0.2*stretchU*2*x/(2*Rgauss*Rgauss)*DATA.tau0;
+//		u[2] = 0.2*0.2*stretchU*2*y/(2*Rgauss*Rgauss)*DATA.tau0;
 		//u[1] = 0.04*0.03*4/3/epsilon*exp(-(x*x+y*y)*stretchU/(2*Rgauss*Rgauss))*cos(phi);
 		//u[2] = 0.04*0.03*4/3/epsilon*exp(-(x*x+y*y)*stretchU/(2*Rgauss*Rgauss))*sin(phi);
-		u[1] = 0;
-		u[2] = 0;
+//		u[0] = sqrt(1.0-u[1]*u[1]-u[2]*u[2]);
+		u[0] = 1.0;
+		u[1] = 0.0;
+		u[2] = 0.0;
             	arena_current(ix, iy, ieta).u[0] = u[0];
             	arena_current(ix, iy, ieta).u[1] = u[1];
             	arena_current(ix, iy, ieta).u[2] = u[2];
@@ -1059,29 +1061,55 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
     music_message.info("output initial eccentricities into a file... ");
     ofstream of("ecc.dat");
     int zmax = 12;
-    std::complex<double> eps[zmax][zmax] = {{0}}; // moment <z^j z*^k> =  <r^(j+k) e^{i(j-k)\phi}>
+    std::complex<double> eps[zmax][zmax] = {{0}}; // moment <z^j z*^k> =  <r^(j+k) e^{i(j-k) phi}>
     std::complex<double> epsU[zmax][zmax] = {{0}}; //
     std::complex<double> epsUbar[zmax][zmax] = {{0}}; //
+//    if (DATA.nx != arena.nX()) cout << "DATA.nx = " << DATA.nx << ", arena.nX = " << arena.nX() << endl;
 //    of << "# x(fm)  y(fm)  eta  ed(GeV/fm^3)";
 //    of << endl;
 	for(int ix = 0; ix < arena.nX(); ix++) {
-	    double x = -DATA.x_size/2. + ix*DATA.delta_x;
+	    double x = DATA.delta_x*(ix*2.0 - DATA.nx)/2.0;
+//	    double x = -DATA.x_size/2. + ix*DATA.delta_x;
 	    for(int iy = 0; iy < arena.nY(); iy++) {
-		double y = -DATA.y_size/2. + iy*DATA.delta_y;
+		double y = DATA.delta_y*(iy*2.0 - DATA.ny)/2.0;
+//		double y = -DATA.y_size/2. + iy*DATA.delta_y;
 		std::complex<double> z (x,y);
 		std::complex<double> zbar = conj(z);
 		double e = arena(ix,iy,ieta).epsilon; // need to define e as T^tautau and similarly with the momentum density for U.  Fix it later.
-		std::complex<double> U (arena(ix,iy,ieta).u[1],arena(ix,iy,ieta).u[2]);
+		double u[4];
+		for (int i = 0; i<4; i++)
+		    u[i] = arena(ix,iy,ieta).u[i];
+		double rhob = arena(ix,iy,ieta).rhob;
+		double p = eos.get_pressure(e,rhob);
+		double pi00 = arena(ix, iy, ieta).Wmunu[0];
+		double T00 = (e+p)*u[0]*u[0] - p + pi00;// T^{tau tau}
+		double pi0x = arena(ix,iy,ieta).Wmunu[1];
+		double pi0y = arena(ix,iy,ieta).Wmunu[2];
+		double T0x = (e+p)*u[0]*u[1] + pi0x;// T^{tau x}
+		double T0y = (e+p)*u[0]*u[2] + pi0y;
+//		std::complex<double> U (arena(ix,iy,ieta).u[1],arena(ix,iy,ieta).u[2]);
+		std::complex<double> U (T0x,T0y);
 		for(int j=0; j < zmax; j++) {
 		    for(int k=0; k < zmax; k++) {
-			eps[j][k] += e*pow(z,j)*pow(zbar,k);
-			epsU[j][k] += U*pow(z,j)*pow(zbar,k);
-			epsUbar[j][k] += conj(U)*pow(z,j)*pow(zbar,k);
+			complex<double> powz, powzbar;
+			if(abs(z) == 0.0) // pow() doesn't work nicely with a vanishing complex number 
+			{
+			   powz = pow(0,j);
+			   powzbar = pow(0,k);
+			}
+			else 
+			{
+			   powz = pow(z,j);
+			   powzbar = pow(zbar,k);
+			}
+			eps[j][k] += T00*powz*powzbar;
+			epsU[j][k] += U*powz*powzbar;
+			epsUbar[j][k] += conj(U)*powz*powzbar;
 		    }
 		}
 	    }
 	}
-	// Define the cumulants by hand
+	// normalize by total energy to obtain <z^j z*^k>
 	for(int j=0; j < zmax; j++) {
 	    for(int k=0; k < zmax; k++) {
 		if(!(j==0 && k==0)) {
@@ -1091,14 +1119,15 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 		}
 	    }
 	}
-
+	// Define the cumulants by hand
 	complex<double> W11 = eps[1][0];
 	complex<double> W02 = eps[1][1];
 	complex<double> W22 = eps[2][0] - W11*W11;
 	complex<double> W13 = eps[2][1] - eps[2][0]*eps[0][-1]
 	    - 2.0*eps[1][1]*eps[1][0] + 2.0*eps[1][0]*eps[1][0]*eps[0][1];
 	complex<double> W33 = eps[3][0] + eps[1][0]*(3.0*eps[2][0] - 2.0*eps[1][0]*eps[1][0]);
-	cout << "eps2 = " << abs(W22/W02) << endl;
-	cout << "eps3 = " << abs(W33/pow(W02,1.5)) << endl;
-	cout << "eps1 = " << abs(W13/pow(W02,1.5)) << endl;
+	cout << "W11 = " << W11 << endl;
+	cout << "eps2 = " << -W22/W02 << endl;
+	cout << "eps3 = " << -W33/pow(W02,1.5) << endl;
+	cout << "eps1 = " << -W13/pow(W02,1.5) << endl;
     }
