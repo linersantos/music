@@ -754,7 +754,7 @@ void Init::initial_distorted_Gaussian(SCGrid &arena_prev,
 		double phi = atan2(y,x);
 		double Rgauss = 3.0; //in fm
 		int nharmonics = 7; //number of harmonics to include in deformation
-		double ecc[nharmonics] = {0,0,0,0,0,0,0};
+		double ecc[nharmonics] = {0,0.6,0,0,0,0,0};
 		double psi[nharmonics] = {0,0,0,0,0,0,0};
 		double r2 = x*x+y*y;
 		double stretch = 1.0;
@@ -1060,13 +1060,13 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
     // this function outputs a set of eccentricities (cumulants) to a file
     music_message.info("output initial eccentricities into a file... ");
     ofstream of("ecc.dat");
+    of << "#No recentering correction has been made! Must use full expression for cumulants!\n";
+    of << "#i\tj\t<z^i zbar^j>_eps\tt<z^i zbar^j>_U\tt<z^i zbar^j>_Ubar\n";
     int zmax = 12;
-    std::complex<double> eps[zmax][zmax] = {{0}}; // moment <z^j z*^k> =  <r^(j+k) e^{i(j-k) phi}>
-    std::complex<double> epsU[zmax][zmax] = {{0}}; //
-    std::complex<double> epsUbar[zmax][zmax] = {{0}}; //
+    complex<double> eps[zmax][zmax] = {{0}}; // moment <z^j z*^k> =  <r^(j+k) e^{i(j-k) phi}>
+    complex<double> epsU[zmax][zmax] = {{0}}; //
+    complex<double> epsUbar[zmax][zmax] = {{0}}; //
 //    if (DATA.nx != arena.nX()) cout << "DATA.nx = " << DATA.nx << ", arena.nX = " << arena.nX() << endl;
-//    of << "# x(fm)  y(fm)  eta  ed(GeV/fm^3)";
-//    of << endl;
 	for(int ix = 0; ix < arena.nX(); ix++) {
 	    double x = DATA.delta_x*(ix*2.0 - DATA.nx)/2.0;
 //	    double x = -DATA.x_size/2. + ix*DATA.delta_x;
@@ -1075,7 +1075,7 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 //		double y = -DATA.y_size/2. + iy*DATA.delta_y;
 		std::complex<double> z (x,y);
 		std::complex<double> zbar = conj(z);
-		double e = arena(ix,iy,ieta).epsilon; // need to define e as T^tautau and similarly with the momentum density for U.  Fix it later.
+		double e = arena(ix,iy,ieta).epsilon;
 		double u[4];
 		for (int i = 0; i<4; i++)
 		    u[i] = arena(ix,iy,ieta).u[i];
@@ -1109,7 +1109,7 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 		}
 	    }
 	}
-	// normalize by total energy to obtain <z^j z*^k>
+	// normalize by total energy to obtain <z^j z*^k> and output to file
 	for(int j=0; j < zmax; j++) {
 	    for(int k=0; k < zmax; k++) {
 		if(!(j==0 && k==0)) {
@@ -1117,8 +1117,10 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 		    epsU[j][k] /= eps[0][0];
 		    epsUbar[j][k] /= eps[0][0];
 		}
+		of << j << "\t" << k << "\t" << eps[j][k] << "\t" << epsU[j][k] << "\t" << epsUbar[j][k] << endl;
 	    }
 	}
+	of.close();
 	// Define the cumulants by hand
 	complex<double> W11 = eps[1][0];
 	complex<double> W02 = eps[1][1];
