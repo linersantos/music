@@ -1046,39 +1046,54 @@ double Diss::Make_uqRHS(double tau, SCGrid &arena, int ix, int iy, int ieta,
 }
 
 double Diss::get_temperature_dependent_eta_s(double T) {
-    double Ttr = 0.18/hbarc;  // phase transition temperature
-    double Tfrac = T/Ttr;
+//    double Ttr = 0.18/hbarc;  // phase transition temperature
+//    double Tfrac = T/Ttr;
+//    double shear_to_s;
+//    if (T < Ttr) {
+//        shear_to_s = (DATA.shear_to_s + 0.0594*(1. - Tfrac)
+//                      + 0.544*(1. - Tfrac*Tfrac));
+//    } else {
+//        shear_to_s = (DATA.shear_to_s + 0.288*(Tfrac - 1.)
+//                      + 0.0818*(Tfrac*Tfrac - 1.));
+//    }
+    /////////////////////////////////////////////
+    //           Parametrization Duke          //
+    /////////////////////////////////////////////
+    //  As used in Duke Baysian analysis.  Constont eta/s 
+    //  below Tc, power law above Tc.
+    //  Parameters from arXiv:1804.06469 Table 5.9
+
     double shear_to_s;
-    if (T < Ttr) {
-        shear_to_s = (DATA.shear_to_s + 0.0594*(1. - Tfrac)
-                      + 0.544*(1. - Tfrac*Tfrac));
-    } else {
-        shear_to_s = (DATA.shear_to_s + 0.288*(Tfrac - 1.)
-                      + 0.0818*(Tfrac*Tfrac - 1.));
-    }
+    double etasmin = 0.081;
+    double etasslope = 1.11*hbarc;
+    double etascrv = -0.48;
+    double Tc = 0.154/hbarc;
+    shear_to_s = etasmin + etasslope*(T - Tc)*pow(T/Tc,etascrv);
+
+
     return(shear_to_s);
 }
 
 double Diss::get_temperature_dependent_zeta_s(double temperature) {
-    // T dependent bulk viscosity from Gabriel
-    /////////////////////////////////////////////
-    //           Parametrization 1             //
-    /////////////////////////////////////////////
-    double Ttr=0.18/0.1973;
-    double dummy=temperature/Ttr;
-    double A1=-13.77, A2=27.55, A3=13.45;
-    double lambda1=0.9, lambda2=0.25, lambda3=0.9, lambda4=0.22;
-    double sigma1=0.025, sigma2=0.13, sigma3=0.0025, sigma4=0.022;
- 
-    double bulk = A1*dummy*dummy + A2*dummy - A3;
-    if (temperature < 0.995*Ttr) {
-        bulk = (lambda3*exp((dummy-1)/sigma3)
-                + lambda4*exp((dummy-1)/sigma4) + 0.03);
-    }
-    if (temperature > 1.05*Ttr) {
-        bulk = (lambda1*exp(-(dummy-1)/sigma1)
-                + lambda2*exp(-(dummy-1)/sigma2) + 0.001);
-    }
+//    // T dependent bulk viscosity from Gabriel
+//    /////////////////////////////////////////////
+//    //           Parametrization 1             //
+//    /////////////////////////////////////////////
+//    double Ttr=0.18/0.1973;
+//    double dummy=temperature/Ttr;
+//    double A1=-13.77, A2=27.55, A3=13.45;
+//    double lambda1=0.9, lambda2=0.25, lambda3=0.9, lambda4=0.22;
+//    double sigma1=0.025, sigma2=0.13, sigma3=0.0025, sigma4=0.022;
+// 
+//    double bulk = A1*dummy*dummy + A2*dummy - A3;
+//    if (temperature < 0.995*Ttr) {
+//        bulk = (lambda3*exp((dummy-1)/sigma3)
+//                + lambda4*exp((dummy-1)/sigma4) + 0.03);
+//    }
+//    if (temperature > 1.05*Ttr) {
+//        bulk = (lambda1*exp(-(dummy-1)/sigma1)
+//                + lambda2*exp(-(dummy-1)/sigma2) + 0.001);
+//    }
 
     /////////////////////////////////////////////
     //           Parametrization 2             //
@@ -1116,6 +1131,20 @@ double Diss::get_temperature_dependent_zeta_s(double temperature) {
     //    bulk = 0.901*exp(14.5*(1.0-dummy)) + 0.061/dummy/dummy;
     //}
 
+    /////////////////////////////////////////////
+    //           Parametrization Duke          //
+    /////////////////////////////////////////////
+    //  Cauchy distribution, as used in Duke Baysian 
+    //  analysis.  Parameters from arXiv:1804.06469 Table 5.9
+    double zsmax = 0.052;
+    double zsw = 0.022;
+    double T0 = 0.183/hbarc; 
+    double bulk = temperature - T0;
+    bulk /= zsw;
+    bulk = bulk*bulk;
+    bulk += 1;
+    bulk = zsmax / bulk;
+ 
     return(bulk);
 }
 
