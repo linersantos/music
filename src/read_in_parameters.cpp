@@ -773,12 +773,15 @@ InitData read_in_parameters(std::string input_file) {
 
     // tolerance for copying spectra -- particles with almost the same mass and chemical potential don't need to be recalculated
     // When tolerances are set to zero, results are exact -- only particles with exactly the same mass and (PCE, baryon) chemical potential are copied
-    double tempMassTolerance = 1e-5; // maximum fractional difference in mass.  This value reduces the number of particles calculated from 319 to 99.
+    double tempMassTolerance = 1e-5; // maximum fractional difference in mass.  
+    // This value (>= 1e-5) reduces the number of particles calculated from 319 to 99.  
+    // Exact result obtaineed by reducing to 0.  Further speedup possible by 
+    // choosing a value larger than, e.g., 0.001, with small decrease in accuracy
     tempinput = Util::StringFind4(input_file, "MassTolerance");
     if(tempinput != "empty") istringstream ( tempinput ) >> tempMassTolerance;
     parameter_list.MassTolerance = tempMassTolerance;
 
-    // tolerance for PCE chemical potential.  
+    // tolerance for PCE chemical potential. Run tests to find optimal value. 
     double tempMuTolerance = 1e-2; 
     tempinput = Util::StringFind4(input_file, "MuTolerance");
     if(tempinput != "empty") istringstream ( tempinput ) >> tempMuTolerance;
