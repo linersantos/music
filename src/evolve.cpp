@@ -269,6 +269,19 @@ int Evolve::FindFreezeOutSurface_Cornelius_XY(double tau, int ieta,
         for (int iy = 0; iy < ny - fac_y; iy += fac_y) {
             double y = iy*(DATA.delta_y) - (DATA.y_size/2.0);
 
+	    if((ix==0 || iy == 0)
+		    && (arena_freezeout(ix,iy,0).epsilon >= epsFO))
+	    {
+		music_message << "Freeze out surface hitting boundary at (x,y) = " << x << ", " << y;
+		music_message.flush("warning");
+	    }	    
+	    if((ix > nx - 2*fac_x || iy > nx - 2*fac_x)
+		    && (arena_freezeout(ix+fac_x,iy+fac_y,0).epsilon >= epsFO))
+	    {
+		music_message << "Freeze out surface hitting boundary at (x,y) = " << x << ", " << y;
+		music_message.flush("warning");
+	    }	    
+
             // judge intersection (from Bjoern)
             int intersect = 1;
             if ((arena_current(ix+fac_x,iy+fac_y,ieta+fac_eta).epsilon-epsFO)
@@ -1086,6 +1099,19 @@ int Evolve::FindFreezeOutSurface_boostinvariant_Cornelius(
             double x = ix*(DATA.delta_x) - (DATA.x_size/2.0);
             for (int iy=0; iy < ny - fac_y; iy += fac_y) {
                 double y = iy*(DATA.delta_y) - (DATA.y_size/2.0);
+
+		if((ix==0 || iy == 0)
+			&& (arena_freezeout(ix,iy,0).epsilon >= epsFO))
+		{
+	            music_message << "Freeze out surface hitting boundary at (x,y) = " << x << ", " << y;
+	            music_message.flush("warning");
+		}	    
+		if((ix > nx - 2*fac_x || iy > nx - 2*fac_x)
+			&& (arena_freezeout(ix+fac_x,iy+fac_y,0).epsilon >= epsFO))
+		{
+	            music_message << "Freeze out surface hitting boundary at (x,y) = " << x << ", " << y;
+	            music_message.flush("warning");
+		}	    
                
                 // judge intersection (from Bjoern)
                 intersect=1;
