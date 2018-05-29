@@ -64,6 +64,18 @@ int Evolve::EvolveIt(SCGrid &arena_prev, SCGrid &arena_current,
                            arena_current.nY(),
                            arena_current.nEta());
 
+    int maxthreads = omp_get_max_threads();
+    // Clean up any existing surface files
+    if (DATA.boost_invariant == 0)
+    {
+	for(int nth = 0; nth < maxthreads; nth++)
+	{
+	    ostringstream filename;
+	    filename << "surface" << nth << ".dat";
+	    remove(filename.str().c_str());
+	}
+    }
+    remove("surface.dat");
     for (int it = 0; it <= itmax; it++) {
         tau = tau0 + dt*it;
 
@@ -160,6 +172,21 @@ int Evolve::EvolveIt(SCGrid &arena_prev, SCGrid &arena_current,
         music_message.flush("info");
         if (frozen == 1) break;
     }
+    if (DATA.boost_invariant == 0)
+    {
+	ofstream FinalSurfaceFile("surface.dat", std::ios_base::binary | ios::out | ios::app);
+//	cout << "Thread number is " << maxthreads << endl;
+	for(int nth = 0; nth < maxthreads; nth++)
+	{
+	    ostringstream filename;
+	    filename << "surface" << nth << ".dat";
+	    ifstream surfacefile;
+	    surfacefile.open(filename.str().c_str(), std::ios_base::binary);
+	    FinalSurfaceFile << surfacefile.rdbuf();
+	    remove(filename.str().c_str());
+	}
+    }
+
     music_message.info("Finished.");
     return 1;
 }
@@ -226,8 +253,9 @@ int Evolve::FindFreezeOutSurface_Cornelius_XY(double tau, int ieta,
     const int ny = arena_current.nY();
 
     stringstream strs_name;
-    strs_name << "surface_eps_" << setprecision(4) << epsFO*hbarc
-              << "_" << thread_id << ".dat";
+    //strs_name << "surface_eps_" << setprecision(4) << epsFO*hbarc
+    //          << "_" << thread_id << ".dat";
+    strs_name << "surface" << thread_id << ".dat";
     ofstream s_file;
     s_file.open(strs_name.str().c_str(), ios::out | ios::app);
     const int dim = 4;
@@ -903,8 +931,9 @@ void Evolve::FreezeOut_equal_tau_Surface_XY(double tau, int ieta,
     const int ny = arena_current.nY();
 
     stringstream strs_name;
-    strs_name << "surface_eps_" << setprecision(4) << epsFO*hbarc
-              << "_" << thread_id << ".dat";
+//    strs_name << "surface_eps_" << setprecision(4) << epsFO*hbarc
+//              << "_" << thread_id << ".dat";
+    strs_name << "surface" << thread_id << ".dat";
     ofstream s_file;
     s_file.open(strs_name.str().c_str(), ios::out | ios::app);
 
@@ -1054,8 +1083,9 @@ int Evolve::FindFreezeOutSurface_boostinvariant_Cornelius(
         double epsFO = epsFO_list[i_freezesurf]/hbarc;
 
         stringstream strs_name;
-        strs_name << "surface_eps_" << setprecision(4) << epsFO*hbarc
-                  << ".dat";
+//        strs_name << "surface_eps_" << setprecision(4) << epsFO*hbarc
+//                  << ".dat";
+        strs_name << "surface.dat";
 
         ofstream s_file;
         s_file.open(strs_name.str().c_str(), ios::out | ios::app);

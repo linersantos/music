@@ -30,13 +30,14 @@ MUSIC::~MUSIC() {
 //! This function initialize hydro
 int MUSIC::initialize_hydro() {
     // clean all the surface files
-    int status = system(
-                    "rm surface.dat surface?.dat surface??.dat 2> /dev/null");
+    // (moved cleanup into EvolveIt)
+//    int status = system(
+//                    "rm surface.dat surface?.dat surface??.dat 2> /dev/null");
 
     init = new Init(eos, DATA, hydro_source_terms);
     init->InitArena(arena_prev, arena_current, arena_future);
     flag_hydro_initialized = 1;
-    return(status);
+    return(1);
 }
 
 
