@@ -706,7 +706,7 @@ void Init::initial_trento_XY(int ieta, SCGrid &arena_prev, SCGrid &arena_current
                 exit(1);
             }
 
-            for (size_t ix = 0; ix <= nx; ix++) {
+            for (size_t ix = 0; ix < nx; ix++) {
                 double s = lineVector[ix];
                 s /= hbarc;//
 
