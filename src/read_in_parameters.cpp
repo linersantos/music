@@ -222,7 +222,7 @@ InitData read_in_parameters(std::string input_file) {
     
     // freeze_out_method:
     // 2: Schenke's more complex method
-    int tempfreezeOutMethod = 2;
+    int tempfreezeOutMethod = 4;
     tempinput = Util::StringFind4(input_file, "freeze_out_method");
     if (tempinput != "empty")
         istringstream(tempinput) >> tempfreezeOutMethod;
