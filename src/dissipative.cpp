@@ -1137,13 +1137,9 @@ double Diss::get_temperature_dependent_zeta_s(double temperature) {
     //  Cauchy distribution, as used in Duke Baysian 
     //  analysis.  Parameters from arXiv:1804.06469 Table 5.9
     double zsmax = 0.052;
-    double zsw = 0.022;
+    double zsw = 0.022/hbarc;
     double T0 = 0.183/hbarc; 
-    double bulk = temperature - T0;
-    bulk /= zsw;
-    bulk = bulk*bulk;
-    bulk += 1;
-    bulk = zsmax / bulk;
+    double bulk = zsmax / (1 + pow((temperature - T0)/zsw,2));
  
     return(bulk);
 }
