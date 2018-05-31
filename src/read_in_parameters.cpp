@@ -85,12 +85,6 @@ InitData read_in_parameters(std::string input_file) {
         istringstream(tempinput) >> temp_rhob_flag;
     parameter_list.initial_eta_rhob_profile = temp_rhob_flag;
     
-    int temp_check_eos = 0;
-    tempinput = Util::StringFind4(input_file, "check_eos");
-    if (tempinput != "empty")
-        istringstream(tempinput) >> temp_check_eos;
-    parameter_list.check_eos = temp_check_eos;
-    
     //initialize_with_entropy:
     //0: scale with energy density
     //1: scale with entropy density
@@ -161,6 +155,16 @@ InitData read_in_parameters(std::string input_file) {
     if (tempinput != "empty")
         istringstream (tempinput) >> temp_freeze_eps_flag;
     parameter_list.freeze_eps_flag = temp_freeze_eps_flag;
+    
+    int temp_freeze_surface_binary = 0;
+    tempinput = Util::StringFind4(input_file, "freeze_surface_in_binary");
+    if (tempinput != "empty")
+        istringstream(tempinput) >> temp_freeze_surface_binary;
+    if (temp_freeze_surface_binary == 0) {
+        parameter_list.freeze_surface_in_binary = false;
+    } else {
+        parameter_list.freeze_surface_in_binary = true;
+    }
 
     //particle_spectrum_to_compute:
     // 0: Do all up to number_of_particles_to_include

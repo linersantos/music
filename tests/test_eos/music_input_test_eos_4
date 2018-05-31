@@ -32,7 +32,7 @@ output_hydro_debug_info  0
 output_evolution_T_cut  0.145 
 outputBinaryEvolution  1 
 Minmod_Theta  1.8 
-EOS_to_use  12
+EOS_to_use 4
 check_eos 1
 QuestRevert_rho_bulk_max  0.1 
 Shear_to_S_ratio  0.08 

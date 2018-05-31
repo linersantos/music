@@ -78,7 +78,6 @@ typedef struct init_data {
 
     double sFactor;     //!< overall normalization on energy density profile
     int whichEOS;       //!< type of EoS
-    int check_eos;      //!< flag to output files to check EoS
     //! flag for boost invariant simulations
     bool boost_invariant;
 
@@ -150,6 +149,7 @@ typedef struct init_data {
     double eps_freeze_max;
     int freeze_eps_flag;
     std::string freeze_list_filename;
+    bool freeze_surface_in_binary;
 
     // for calculation of spectra
     int pseudofreeze;    //! flag to compute spectra in pseudorapdity

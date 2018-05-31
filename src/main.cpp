@@ -27,11 +27,14 @@ int main(int argc, char *argv[]) {
         music_hydro.run_hydro();
     }
 
-    if (running_mode == 1 || running_mode == 3
-            || running_mode == 4 || running_mode >= 5) {
+    if (running_mode == 1 || running_mode == 3 || running_mode == 4
+            || running_mode == 13 || running_mode == 14) {
         music_hydro.run_Cooper_Frye();
     }
 
+    if (running_mode == 71) {
+        music_hydro.check_eos();
+    }
     if (running_mode == 73) {
         music_hydro.output_transport_coefficients();
     }
