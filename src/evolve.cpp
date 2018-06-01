@@ -984,11 +984,13 @@ void Evolve::FreezeOut_equal_tau_Surface_XY(double tau, int ieta,
 
     stringstream strs_name;
     if (DATA.boost_invariant == 0) {
-        strs_name << "surface_eps_" << setprecision(4) << epsFO*hbarc
-                  << "_" << thread_id << ".dat";
+//        strs_name << "surface_eps_" << setprecision(4) << epsFO*hbarc
+//                  << "_" << thread_id << ".dat";
+	strs_name << "surface" << thread_id << ".dat";
     } else {
-        strs_name << "surface_eps_" << setprecision(4) << epsFO*hbarc
-                  << ".dat";
+//        strs_name << "surface_eps_" << setprecision(4) << epsFO*hbarc
+//                  << ".dat";
+	strs_name << "surface.dat";
     }
     ofstream s_file;
     if (surface_in_binary) {
