@@ -1102,7 +1102,7 @@ void Freeze::compute_thermal_particle_spectra_and_vn(InitData* DATA) {
             if (id < particleMax) {
                 OutputDifferentialFlowAtMidrapidity(DATA, number, 0);
                 OutputDifferentialFlowNearMidrapidity(DATA, number, 0);
-                OutputIntegratedFlow_vs_y(DATA, number, 0, 0.01, 3.0);
+//                OutputIntegratedFlow_vs_y(DATA, number, 0, 0.01, 3.0);
             }
         }
     }
@@ -1156,7 +1156,7 @@ void Freeze::compute_final_particle_spectra_and_vn(InitData* DATA) {
             if (id < particleMax) {
                 OutputDifferentialFlowAtMidrapidity(DATA, number, 1);
                 OutputDifferentialFlowNearMidrapidity(DATA, number, 1);
-                OutputIntegratedFlow_vs_y(DATA, number, 1, 0.01, 3.0);
+//                OutputIntegratedFlow_vs_y(DATA, number, 1, 0.01, 3.0);
             }
         }
     }
@@ -1172,50 +1172,50 @@ void Freeze::CooperFrye_pseudo(int particleSpectrumNumber, int mode,
     if (mode == 3 || mode == 1) {  // compute thermal spectra
         compute_thermal_spectra(particleSpectrumNumber, DATA);
     }
+    if (mode==13 || mode == 3 || mode == 1) {
+        compute_thermal_particle_spectra_and_vn(DATA);
+//        get_vn(DATA, pT_min, pT_max, 0, eta_min, eta_max, iorder, vn_temp);
+//        double *vn_temp = new double [2];
+//	double pT_min = 0.1;
+//	double pT_max = 3.0;
+//	double eta_min = 0.0;
+//	double eta_max = 0.0;
+//        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 2, vn_temp);
+//	cout << "v2 = " << sqrt(vn_temp[0]*vn_temp[0] + vn_temp[1]*vn_temp[1]) << endl;
+//        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 3, vn_temp);
+//	cout << "v3 = " << sqrt(vn_temp[0]*vn_temp[0] + vn_temp[1]*vn_temp[1]) << endl;
+//        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 4, vn_temp);
+//	cout << "v4 = " << sqrt(vn_temp[0]*vn_temp[0] + vn_temp[1]*vn_temp[1]) << endl;
+//        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 5, vn_temp);
+//	cout << "v5 = " << sqrt(vn_temp[0]*vn_temp[0] + vn_temp[1]*vn_temp[1]) << endl;
+//        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 6, vn_temp);
+//	cout << "v6 = " << sqrt(vn_temp[0]*vn_temp[0] + vn_temp[1]*vn_temp[1]) << endl;
+//        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 7, vn_temp);
+//	cout << "v7 = " << sqrt(vn_temp[0]*vn_temp[0] + vn_temp[1]*vn_temp[1]) << endl;
+    } 
     if (mode==4 || mode==1) { //  do resonance decays
         perform_resonance_decays(DATA);
     } 
-    if (mode==13 || mode == 3 || mode == 1) {
-//        compute_thermal_particle_spectra_and_vn(DATA);
-//        get_vn(DATA, pT_min, pT_max, 0, eta_min, eta_max, iorder, vn_temp);
-        double *vn_temp = new double [2];
-	double pT_min = 0.1;
-	double pT_max = 3.0;
-	double eta_min = 0.0;
-	double eta_max = 0.0;
-        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 2, vn_temp);
-	cout << "v2 = " << vn_temp[0] << endl;;
-        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 3, vn_temp);
-	cout << "v3 = " << vn_temp[0] << endl;;
-        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 4, vn_temp);
-	cout << "v4 = " << vn_temp[0] << endl;;
-        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 5, vn_temp);
-	cout << "v5 = " << vn_temp[0] << endl;;
-        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 6, vn_temp);
-	cout << "v6 = " << vn_temp[0] << endl;;
-        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 7, vn_temp);
-	cout << "v7 = " << vn_temp[0] << endl;;
-    } 
     if (mode==14 || mode == 4 || mode == 1) {
 	cout << "After resonance decay:\n";
-        double *vn_tempF = new double [2];
-	double pT_minF = 0.1;
-	double pT_maxF = 3.0;
-	double eta_minF = 0.0;
-	double eta_maxF = 0.0;
-        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 2, vn_tempF);
-	cout << "v2 = " << vn_tempF[0] << endl;;
-        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 3, vn_tempF);
-	cout << "v3 = " << vn_tempF[0] << endl;;
-        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 4, vn_tempF);
-	cout << "v4 = " << vn_tempF[0] << endl;;
-        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 5, vn_tempF);
-	cout << "v5 = " << vn_tempF[0] << endl;;
-        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 6, vn_tempF);
-	cout << "v6 = " << vn_tempF[0] << endl;;
-        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 7, vn_tempF);
-	cout << "v7 = " << vn_tempF[0] << endl;;
-//        compute_final_particle_spectra_and_vn(DATA);
+//        double *vn_tempF = new double [2];
+//	double pT_minF = 0.1;
+//	double pT_maxF = 3.0;
+//	double eta_minF = 0.0;
+//	double eta_maxF = 0.0;
+//        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 2, vn_tempF);
+//	cout << "v2 = " << sqrt(vn_tempF[0]*vn_tempF[0] + vn_tempF[1]*vn_tempF[1]) << endl;
+//        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 3, vn_tempF);
+//	cout << "v3 = " << sqrt(vn_tempF[0]*vn_tempF[0] + vn_tempF[1]*vn_tempF[1]) << endl;
+//        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 4, vn_tempF);
+//	cout << "v4 = " << sqrt(vn_tempF[0]*vn_tempF[0] + vn_tempF[1]*vn_tempF[1]) << endl;
+//        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 5, vn_tempF);
+//	cout << "v5 = " << sqrt(vn_tempF[0]*vn_tempF[0] + vn_tempF[1]*vn_tempF[1]) << endl;
+//        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 6, vn_tempF);
+//	cout << "v6 = " << sqrt(vn_tempF[0]*vn_tempF[0] + vn_tempF[1]*vn_tempF[1]) << endl;
+//        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 7, vn_tempF);
+//	cout << "v7 = " << sqrt(vn_tempF[0]*vn_tempF[0] + vn_tempF[1]*vn_tempF[1]) << endl;
+        compute_final_particle_spectra_and_vn(DATA);
     } 
 
     // clean up
