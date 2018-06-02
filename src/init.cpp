@@ -1061,11 +1061,12 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
     music_message.info("output initial eccentricities into a file... ");
     ofstream of("ecc.dat");
     of << "#No recentering correction has been made! Must use full expression for cumulants!\n";
-    of << "#i\tj\t<z^i zbar^j>_eps\tt<z^i zbar^j>_U\tt<z^i zbar^j>_Ubar\n";
+    of << "#i\tj\t<z^i zbar^j>_eps\t<z^i zbar^j>_U\t<z^i zbar^j>_Ubar\t<z^i zbar^j>_s\n";
     int zmax = 12;
     complex<double> eps[zmax][zmax] = {{0}}; // moment <z^j z*^k> =  <r^(j+k) e^{i(j-k) phi}>
-    complex<double> epsU[zmax][zmax] = {{0}}; //
+    complex<double> epsU[zmax][zmax] = {{0}}; // same but using momentum density as weight U = T^0x + i T^0y
     complex<double> epsUbar[zmax][zmax] = {{0}}; //
+    complex<double> epsS[zmax][zmax] = {{0}}; // using entropy density as weight
 //    if (DATA.nx != arena.nX()) cout << "DATA.nx = " << DATA.nx << ", arena.nX = " << arena.nX() << endl;
 	for(int ix = 0; ix < arena.nX(); ix++) {
 	    double x = DATA.delta_x*(ix*2.0 - DATA.nx)/2.0;
@@ -1089,6 +1090,7 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 		double T0y = (e+p)*u[0]*u[2] + pi0y;
 //		std::complex<double> U (arena(ix,iy,ieta).u[1],arena(ix,iy,ieta).u[2]);
 		std::complex<double> U (T0x,T0y);
+		double s = eos.get_entropy(e, rhob);
 		for(int j=0; j < zmax; j++) {
 		    for(int k=0; k < zmax; k++) {
 			complex<double> powz, powzbar;
@@ -1105,6 +1107,7 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 			eps[j][k] += T00*powz*powzbar;
 			epsU[j][k] += U*powz*powzbar;
 			epsUbar[j][k] += conj(U)*powz*powzbar;
+			epsS[j][k] += s*powz*powzbar;
 		    }
 		}
 	    }
@@ -1116,8 +1119,10 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 		    eps[j][k] /= eps[0][0];
 		    epsU[j][k] /= eps[0][0];
 		    epsUbar[j][k] /= eps[0][0];
+		    epsS[j][k] /= epsS[0][0];
 		}
-		of << j << "\t" << k << "\t" << eps[j][k] << "\t" << epsU[j][k] << "\t" << epsUbar[j][k] << endl;
+		of << j << "\t" << k << "\t" << eps[j][k] << "\t" 
+		    << epsU[j][k] << "\t" << epsUbar[j][k] << "\t" << epsS[j][k] << endl;
 	    }
 	}
 	of.close();
@@ -1128,8 +1133,18 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 	complex<double> W13 = eps[2][1] - eps[2][0]*eps[0][-1]
 	    - 2.0*eps[1][1]*eps[1][0] + 2.0*eps[1][0]*eps[1][0]*eps[0][1];
 	complex<double> W33 = eps[3][0] + eps[1][0]*(3.0*eps[2][0] - 2.0*eps[1][0]*eps[1][0]);
+	complex<double> SW11 = eps[1][0];
+	complex<double> SW02 = epsS[1][1];
+	complex<double> SW22 = epsS[2][0] - SW11*W11;
+	complex<double> SW13 = epsS[2][1] - epsS[2][0]*epsS[0][-1]
+	    - 2.0*eps[1][1]*eps[1][0] + 2.0*epsS[1][0]*epsS[1][0]*epsS[0][1];
+	complex<double> SW33 = epsS[3][0] + epsS[1][0]*(3.0*epsS[2][0] - 2.0*epsS[1][0]*epsS[1][0]);
 	cout << "W11 = " << W11 << endl;
 	cout << "eps2 = " << -W22/W02 << endl;
 	cout << "eps3 = " << -W33/pow(W02,1.5) << endl;
 	cout << "eps1 = " << -W13/pow(W02,1.5) << endl;
+	cout << "Using entropy as weight instead of energy density:\n";
+	cout << "eps2S = " << -SW22/SW02 << endl;
+	cout << "eps3S = " << -SW33/pow(SW02,1.5) << endl;
+	cout << "eps1S = " << -SW13/pow(SW02,1.5) << endl;
     }
