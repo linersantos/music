@@ -1117,10 +1117,10 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 	    for(int k=0; k < zmax; k++) {
 		if(!(j==0 && k==0)) {
 		    eps[j][k] /= eps[0][0];
-		    epsU[j][k] /= eps[0][0];
-		    epsUbar[j][k] /= eps[0][0];
 		    epsS[j][k] /= epsS[0][0];
 		}
+		epsU[j][k] /= eps[0][0];
+		epsUbar[j][k] /= eps[0][0];
 		of << j << "\t" << k << "\t" << eps[j][k] << "\t" 
 		    << epsU[j][k] << "\t" << epsUbar[j][k] << "\t" << epsS[j][k] << endl;
 	    }
@@ -1128,16 +1128,16 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 	of.close();
 	// Define the cumulants by hand
 	complex<double> W11 = eps[1][0];
-	complex<double> W02 = eps[1][1];
+	complex<double> W02 = eps[1][1] - eps[1][0]*eps[0][1];
 	complex<double> W22 = eps[2][0] - W11*W11;
-	complex<double> W13 = eps[2][1] - eps[2][0]*eps[0][-1]
+	complex<double> W13 = eps[2][1] - eps[2][0]*eps[0][1]
 	    - 2.0*eps[1][1]*eps[1][0] + 2.0*eps[1][0]*eps[1][0]*eps[0][1];
 	complex<double> W33 = eps[3][0] + eps[1][0]*(3.0*eps[2][0] - 2.0*eps[1][0]*eps[1][0]);
-	complex<double> SW11 = eps[1][0];
-	complex<double> SW02 = epsS[1][1];
-	complex<double> SW22 = epsS[2][0] - SW11*W11;
-	complex<double> SW13 = epsS[2][1] - epsS[2][0]*epsS[0][-1]
-	    - 2.0*eps[1][1]*eps[1][0] + 2.0*epsS[1][0]*epsS[1][0]*epsS[0][1];
+	complex<double> SW11 = epsS[1][0];
+	complex<double> SW02 = epsS[1][1] - epsS[1][0]*eps[0][1];
+	complex<double> SW22 = epsS[2][0] - SW11*SW11;
+	complex<double> SW13 = epsS[2][1] - epsS[2][0]*epsS[0][1]
+	    - 2.0*epsS[1][1]*epsS[1][0] + 2.0*epsS[1][0]*epsS[1][0]*epsS[0][1];
 	complex<double> SW33 = epsS[3][0] + epsS[1][0]*(3.0*epsS[2][0] - 2.0*epsS[1][0]*epsS[1][0]);
 	cout << "W11 = " << W11 << endl;
 	cout << "eps2 = " << -W22/W02 << endl;
