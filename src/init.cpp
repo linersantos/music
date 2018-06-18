@@ -1147,4 +1147,35 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 	cout << "eps2S = " << -SW22/SW02 << endl;
 	cout << "eps3S = " << -SW33/pow(SW02,1.5) << endl;
 	cout << "eps1S = " << -SW13/pow(SW02,1.5) << endl;
+// calculate <r^3> and <r^5> in centered coordinates
+// for comparison to common convention for normalization of eccentricities
+	double den2 = 0.0; // <r^2>, should be equal to W02
+	double den3 = 0.0; // <r^3>, not an analytic function of cumulants
+	double den4 = 0.0; // <r^4> = W04 + 2*W02^2 + |W22|^2
+	double den5 = 0.0; // <r^5>
+	for(int ix = 0; ix < arena.nX(); ix++) {
+	    double x = DATA.delta_x*(ix*2.0 - DATA.nx)/2.0;
+	    // recenter coordinates
+	    x += -W11.real();
+//	    double x = -DATA.x_size/2. + ix*DATA.delta_x;
+	    for(int iy = 0; iy < arena.nY(); iy++) {
+		double y = DATA.delta_y*(iy*2.0 - DATA.ny)/2.0;
+	    // recenter coordinates
+		y += -W11.imag();
+		double r2 = x*x+y*y;
+		double r3 = pow(r2,1.5);
+		double r4 = r2*r2;
+		double r5 = r3*r2;
+		den2 += r2;
+		den3 += r3;
+		den4 += r4;
+		den5 += r5;
+	    }
+	}
+	cout << "<r^2> = " << den2 << endl;
+	cout << "<r^3> = " << den3 << endl;
+	cout << "<r^4> = " << den4 << endl;
+	cout << "<r^5> = " << den5 << endl;
+	cout << "Alternate eps3 = " << -W33/den3 << endl;
+//	cout << "Alternate eps5 = " << -W55/den5 << endl;
     }
