@@ -1172,6 +1172,10 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 		den5 += r5;
 	    }
 	}
+	den2 /= eps[0][0];
+	den3 /= eps[0][0];
+	den4 /= eps[0][0];
+	den5 /= eps[0][0];
 	cout << "<r^2> = " << den2 << endl;
 	cout << "<r^3> = " << den3 << endl;
 	cout << "<r^4> = " << den4 << endl;
