@@ -94,7 +94,7 @@ double Freeze::Edndp3(double yr, double ptr, double phirin, int res_num) {
         val1 = exp(val1);
     }
   
-    if (std::isnan(val1)) {
+    if (isnan(val1)) {
         fprintf(stderr,"\n number=%d\n\n",res_num);
         fprintf(stderr,"val1=%f\n",val1);
         fprintf(stderr,"f1=%f\n",f1);
@@ -153,7 +153,7 @@ double Freeze::Edndp3(double yr, double ptr, double phirin, int res_num) {
     double val = Util::lin_int(particleList[pn].y[ny-1],
                                particleList[pn].y[ny], val1, val2, yr);
 
-    if (std::isnan(val)) {
+    if (isnan(val)) {
         fprintf(stderr,"val=%f\n",val);
         fprintf(stderr,"val1=%f\n",val1);
         fprintf(stderr,"val2=%f\n",val2);
@@ -477,7 +477,7 @@ void Freeze::add_reso(int pn, int pnR, int k, int j) {
                             y, particleList[pn].pt[l], phi,
                             m1, m2, mr,
                             particleList[pnR].number);
-                    if (std::isnan(spectrum)) {
+                    if (isnan(spectrum)) {
                         fprintf(stderr, "2 pt=%f\n",
                                 particleList[pn].pt[l]);
                         fprintf(stderr, "2 number=%d\n",
@@ -517,7 +517,7 @@ void Freeze::add_reso(int pn, int pnR, int k, int j) {
                             y, particleList[pn].pt[l], phi,
                             m1, m2, mr,
                             particleList[pnR].number);
-                    if (std::isnan(spectrum)) {
+                    if (isnan(spectrum)) {
                         fprintf(stderr, "2 pt=%f\n",
                                 particleList[pn].pt[l]);
                         fprintf(stderr, "2 number=%d\n",
@@ -583,7 +583,7 @@ void Freeze::add_reso(int pn, int pnR, int k, int j) {
                             y, particleList[pn].pt[l], phi,
                             m1, m2, m3, mr, norm3, 
                             particleList[pnR].number);
-                    if (std::isnan(spectrum)) {
+                    if (isnan(spectrum)) {
                         fprintf(stderr,"3 number=%d\n",
                                 particleList[pnR].number);
                         fprintf(stderr,"3 Edn..=%f\n", spectrum);
@@ -622,7 +622,7 @@ void Freeze::add_reso(int pn, int pnR, int k, int j) {
                             y, particleList[pn].pt[l], phi,
                             m1, m2, m3, mr, norm3, 
                             particleList[pnR].number);
-                    if (std::isnan(spectrum)) {
+                    if (isnan(spectrum)) {
                         fprintf(stderr,"3 number=%d\n",
                                 particleList[pnR].number);
                         fprintf(stderr,"3 Edn..=%f\n", spectrum);
@@ -695,7 +695,7 @@ void Freeze::add_reso(int pn, int pnR, int k, int j) {
                             y, particleList[pn].pt[l], phi,
                             m1, m2, m3, mr, norm3,
                             particleList[pnR].number);
-                    if (std::isnan(spectrum)) {
+                    if (isnan(spectrum)) {
                         fprintf(stderr, "3 number=%d\n",
                                 particleList[pnR].number);
                     } else {
@@ -725,7 +725,7 @@ void Freeze::add_reso(int pn, int pnR, int k, int j) {
                             y, particleList[pn].pt[l], phi,
                             m1, m2, m3, mr, norm3,
                             particleList[pnR].number);
-                    if (std::isnan(spectrum)) {
+                    if (isnan(spectrum)) {
                         fprintf(stderr, "3 number=%d\n",
                                 particleList[pnR].number);
                     } else {
