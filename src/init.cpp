@@ -753,7 +753,7 @@ void Init::initial_distorted_Gaussian(SCGrid &arena_prev,
 
 		double phi = atan2(y,x);
 		double Rgauss = 3.0; //in fm
-		const int nharmonics = 7; //number of harmonics to include in deformation
+		int nharmonics = 7; //number of harmonics to include in deformation
 		double ecc[nharmonics] = {0,0.6,0,0,0,0,0};
 		double psi[nharmonics] = {0,0,0,0,0,0,0};
 		double r2 = x*x+y*y;
@@ -1062,7 +1062,7 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
     ofstream of("ecc.dat");
     of << "#No recentering correction has been made! Must use full expression for cumulants!\n";
     of << "#i\tj\t<z^i zbar^j>_eps\t<z^i zbar^j>_U\t<z^i zbar^j>_Ubar\t<z^i zbar^j>_s\n";
-    const int zmax = 12;
+    int zmax = 12;
     complex<double> eps[zmax][zmax] = {{0}}; // moment <z^j z*^k> =  <r^(j+k) e^{i(j-k) phi}>
     complex<double> epsU[zmax][zmax] = {{0}}; // same but using momentum density as weight U = T^0x + i T^0y
     complex<double> epsUbar[zmax][zmax] = {{0}}; //

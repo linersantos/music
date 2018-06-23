@@ -100,7 +100,7 @@ int Reconst::ReconstIt_velocity_Newton(ReconstCell &grid_p, double tau,
         rhob = J0/u0_solution;
     }
 
-    double check_u0_var = abs(u[0] - grid_pt.u[0])/grid_pt.u[0];
+    double check_u0_var = std::abs(u[0] - grid_pt.u[0])/grid_pt.u[0];
     if (check_u0_var > 100.) {
         if (grid_pt.epsilon > 1e-6 && echo_level > 2) {
             music_message << "Reconst velocity Newton:: "
