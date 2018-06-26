@@ -183,7 +183,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
     
     char *specString=new char[30];
     strcpy(specString, "yptphiSpectra");
-    strcat(specString, buf);
+//    strcat(specString, buf);
     strcat(specString, ".dat");
     char* s_name = specString;
     FILE *s_file;
@@ -609,7 +609,8 @@ void Freeze::ComputeParticleSpectrum_pseudo_boost_invariant(
     string d_name = "particleInformation.dat";
     d_file = fopen(d_name.c_str(), "a");
 
-    string s_name = "yptphiSpectra0.dat";
+//    string s_name = "yptphiSpectra0.dat";
+    string s_name = "yptphiSpectra.dat";
     FILE *s_file;
     s_file = fopen(s_name.c_str(), "w");
 
