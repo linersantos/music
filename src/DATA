@@ -1,0 +1,1736 @@
+advance.cpp://! this function evolves one Runge-Kutta step in tau
+advance.cpp:        double eta_s_local = - DATA.eta_size/2. + ieta*DATA.delta_eta;
+advance.cpp:        double x_local     = - DATA.x_size  /2. +   ix*DATA.delta_x;
+advance.cpp:        double y_local     = - DATA.y_size  /2. +   iy*DATA.delta_y;
+advance.cpp:  // Solve partial_a T^{a mu} = -partial_a W^{a mu}
+advance.cpp:    qi[alpha] -= dwmn*(DATA.delta_tau);
+advance.cpp:    // non-zero remove/modify if rho_b!=0
+advance.cpp:    // - this is only to remove the viscous correction that
+advance.cpp:      if (alpha == 4 && fabs(qi[alpha]) > 1e-12)
+advance.cpp:    // solve partial_tau (u^0 W^{kl}) = -partial_i (u^i W^{kl}
+advance.cpp:                tempf = ((grid_pt_c->Wmunu[idx_1d])*(grid_pt_c->u[0]));
+advance.cpp:                grid_pt_f->Wmunu[idx_1d] = tempf/(grid_pt_f->u[0]);
+advance.cpp:                tempf = (grid_pt_prev->Wmunu[idx_1d])*(grid_pt_prev->u[0]);
+advance.cpp:                tempf += ((grid_pt_c->Wmunu[idx_1d])*(grid_pt_c->u[0]));
+advance.cpp:                grid_pt_f->Wmunu[idx_1d] = tempf/(grid_pt_f->u[0]);
+advance.cpp:            tempf = (grid_pt_c->pi_b)*(grid_pt_c->u[0]);
+advance.cpp:            grid_pt_f->pi_b = tempf/(grid_pt_f->u[0]);
+advance.cpp:            tempf = (grid_pt_prev->pi_b)*(grid_pt_prev->u[0]);
+advance.cpp:            tempf += (grid_pt_c->pi_b)*(grid_pt_c->u[0]);
+advance.cpp:            grid_pt_f->pi_b = tempf/(grid_pt_f->u[0]);
+advance.cpp:        grid_pt_f->pi_b = 0.0;
+advance.cpp:                tempf = ((grid_pt_c->Wmunu[idx_1d])*(grid_pt_c->u[0]));
+advance.cpp:                grid_pt_f->Wmunu[idx_1d] = tempf/grid_pt_f->u[0];
+advance.cpp:                tempf = (grid_pt_prev->Wmunu[idx_1d])*(grid_pt_prev->u[0]);
+advance.cpp:                tempf += grid_pt_c->Wmunu[idx_1d]*grid_pt_c->u[0];
+advance.cpp:                grid_pt_f->Wmunu[idx_1d] = tempf/(grid_pt_f->u[0]);
+advance.cpp:            grid_pt_f->Wmunu[idx_1d] = 0.0;
+advance.cpp:    // re-make Wmunu[3][3] so that Wmunu[mu][nu] is traceless
+advance.cpp:    grid_pt_f->Wmunu[9] = (
+advance.cpp:        (2.*(  grid_pt_f->u[1]*grid_pt_f->u[2]*grid_pt_f->Wmunu[5]
+advance.cpp:             + grid_pt_f->u[1]*grid_pt_f->u[3]*grid_pt_f->Wmunu[6]
+advance.cpp:             + grid_pt_f->u[2]*grid_pt_f->u[3]*grid_pt_f->Wmunu[8])
+advance.cpp:         - (grid_pt_f->u[0]*grid_pt_f->u[0] - grid_pt_f->u[1]*grid_pt_f->u[1])
+advance.cpp:           *grid_pt_f->Wmunu[4]
+advance.cpp:         - (grid_pt_f->u[0]*grid_pt_f->u[0] - grid_pt_f->u[2]*grid_pt_f->u[2])
+advance.cpp:           *grid_pt_f->Wmunu[7])
+advance.cpp:        /(grid_pt_f->u[0]*grid_pt_f->u[0] - grid_pt_f->u[3]*grid_pt_f->u[3]));
+advance.cpp:            tempf += grid_pt_f->Wmunu[idx_1d]*grid_pt_f->u[nu];
+advance.cpp:        grid_pt_f->Wmunu[mu] = tempf/(grid_pt_f->u[0]);
+advance.cpp:        tempf += grid_pt_f->Wmunu[nu]*grid_pt_f->u[nu];
+advance.cpp:    grid_pt_f->Wmunu[0] = tempf/(grid_pt_f->u[0]);
+advance.cpp:        tempf += grid_pt_f->Wmunu[idx_1d]*grid_pt_f->u[nu];
+advance.cpp:    grid_pt_f->Wmunu[10] = DATA.turn_on_diff*tempf/(grid_pt_f->u[0]);
+advance.cpp:    double e_local   = grid_pt->epsilon;
+advance.cpp:    double rhob      = grid_pt->rhob;
+advance.cpp:    // double factor = 300.*tanh(grid_pt->epsilon/eps_scale);
+advance.cpp:    double factor = 100.*(1./(exp(-(e_local - eps_scale)/xi) + 1.)
+advance.cpp:        - 1./(exp(eps_scale/xi) + 1.));
+advance.cpp:    double pi_00 = grid_pt->Wmunu[0];
+advance.cpp:    double pi_01 = grid_pt->Wmunu[1];
+advance.cpp:    double pi_02 = grid_pt->Wmunu[2];
+advance.cpp:    double pi_03 = grid_pt->Wmunu[3];
+advance.cpp:    double pi_11 = grid_pt->Wmunu[4];
+advance.cpp:    double pi_12 = grid_pt->Wmunu[5];
+advance.cpp:    double pi_13 = grid_pt->Wmunu[6];
+advance.cpp:    double pi_22 = grid_pt->Wmunu[7];
+advance.cpp:    double pi_23 = grid_pt->Wmunu[8];
+advance.cpp:    double pi_33 = grid_pt->Wmunu[9];
+advance.cpp:         - 2.*(pi_01*pi_01 + pi_02*pi_02 + pi_03*pi_03)
+advance.cpp:    double pi_local = grid_pt->pi_b;
+advance.cpp:            grid_pt->Wmunu[mu] = (rho_shear_max/rho_shear)*grid_pt->Wmunu[mu];
+advance.cpp:        grid_pt->pi_b = (rho_bulk_max/rho_bulk)*grid_pt->pi_b;
+advance.cpp:    double factor = 100.*(1./(exp(-(grid_pt->epsilon - eps_scale)/xi) + 1.)
+advance.cpp:                          - 1./(exp(eps_scale/xi) + 1.));
+advance.cpp:        q_mu_local[i] = grid_pt->Wmunu[10+i];
+advance.cpp:        double gfac = (i == 0 ? -1.0 : 1.0);
+advance.cpp:    // (in the conversion of gmn = diag(-+++))
+advance.cpp:            grid_pt->Wmunu[idx_1d] = 0.0;
+advance.cpp:    double e_local = grid_pt->epsilon;
+advance.cpp:    double rhob_local = grid_pt->rhob;
+advance.cpp:                          << "-- diffusion |q/rhob| = " << rho_q;
+advance.cpp:            grid_pt->Wmunu[10+i] = (rho_q_max/rho_q)*q_mu_local[i];
+advance.cpp:            const double fphR = -0.5*minmod.minmod_dx(
+advance.cpp:            const double fmhR = -fphL;
+advance.cpp:        // for each direction, reconstruct half-way cells
+advance.cpp:            // KT: H_{j+1/2} = (f(u^+_{j+1/2}) + f(u^-_{j+1/2})/2
+advance.cpp:            //                  - a_{j+1/2}(u_{j+1/2}^+ - u^-_{j+1/2})/2
+advance.cpp:                               - aiph*(qiphR[alpha] - qiphL[alpha]));
+advance.cpp:                               - aimh*(qimhR[alpha] - qimhL[alpha]));
+advance.cpp:            double DFmmp = (Fimh - Fiph)/delta[direction];
+advance.cpp:    rhs[0] -= get_TJb(arena_current(ix, iy, ieta), 3, 3)*DATA.delta_tau;
+advance.cpp:    rhs[3] -= get_TJb(arena_current(ix, iy, ieta), 3, 0)*DATA.delta_tau;
+advance.cpp:    double ut2mux2 = utau2 - ux2;
+advance.cpp:    double den = utau2*(1. - vs2) + vs2;
+advance.cpp:    double num_temp_sqrt = (ut2mux2 - (ut2mux2 - 1.)*vs2)*vs2;
+advance.cpp:        num = utau*ux*(1. - vs2) + sqrt(num_temp_sqrt);
+advance.cpp:            num = (sqrt(-(h*dpde*h*(dpde*(-1.0 + ut2mux2) - ut2mux2)))
+advance.cpp:                   - h*(-1.0 + dpde)*utau*ux);
+advance.cpp:    double f = num/(den + 1e-15);
+advance.cpp:            if (fabs(f-ux/utau)<0.0001) {
+advance.cpp:                fprintf(stderr, "SpeedMax-v = %lf\n", f-ux/utau);
+advance.cpp:    f *= g[direc-1];
+advance.cpp:    assert(mu < 5); assert(mu > -1);
+advance.cpp:    assert(nu < 4); assert(nu > -1);
+advance.cpp:            gfac = -1.0;
+advance.cpp:    assert(mu < 5); assert(mu > -1);
+advance.cpp:    assert(nu < 4); assert(nu > -1);
+advance.cpp:            gfac = -1.0;
+cornelius.cpp: * of the heavy-ion physics community. Permission to use it for any purpose
+cornelius.cpp: *   P. Huovinen and H. Petersen, arXiv:1206.3371 [nucl-th]
+cornelius.cpp:      normal[i] = -normal[i];
+cornelius.cpp:  const_i = new int[DIM-LINE_DIM]; 
+cornelius.cpp:  for (int i=0; i < DIM-LINE_DIM; i++) {
+cornelius.cpp:  //Here we fix the non-zero indices in such a way that x1 is
+cornelius.cpp:  //Normal is just (-dy,dx)
+cornelius.cpp:  normal[x1] = -(corners[1][x2] - corners[0][x2]);
+cornelius.cpp:  normal[x2] = corners[1][x1] - corners[0][x1];
+cornelius.cpp:    Vout[j] = out[j] - centroid[j];
+cornelius.cpp:  x1 = -1;
+cornelius.cpp:  x2 = -1;
+cornelius.cpp:  x3 = -1;
+cornelius.cpp:  double eps = 1e-10;
+cornelius.cpp:    double *p1 =  l->get_start();
+cornelius.cpp:    double *p2 =  l->get_end();
+cornelius.cpp:    double *p3 =  lines[Nlines-1]->get_end();
+cornelius.cpp:      diff1 += fabs(p1[j]-p3[j]);
+cornelius.cpp:      diff2 += fabs(p2[j]-p3[j]);
+cornelius.cpp:        l->flip_start_end();
+cornelius.cpp:    double *p1 = lines[i]->get_start(); 
+cornelius.cpp:    double *p2 = lines[i]->get_end(); 
+cornelius.cpp:    double *p1 = lines[i]->get_start();
+cornelius.cpp:    double *p2 = lines[i]->get_end();
+cornelius.cpp:      a[j] = p1[j] - mean[j];
+cornelius.cpp:      b[j] = p2[j] - mean[j];
+cornelius.cpp:    double A_i = 0.5*sqrt( pow(a[x2]*b[x3]-a[x3]*b[x2],2.0) + pow(a[x1]*b[x3]-a[x3]*b[x1],2.0) + pow(a[x2]*b[x1]-a[x1]*b[x2],2.0) );
+cornelius.cpp:    double *p1 = lines[i]->get_start();
+cornelius.cpp:    double *p2 = lines[i]->get_end();
+cornelius.cpp:      a[j] = p1[j] - centroid[j];
+cornelius.cpp:      b[j] = p2[j] - centroid[j];
+cornelius.cpp:    normals[i][x1] =  0.5*(a[x2]*b[x3]-a[x3]*b[x2]);
+cornelius.cpp:    normals[i][x2] = -0.5*(a[x1]*b[x3]-a[x3]*b[x1]);
+cornelius.cpp:    normals[i][x3] =  0.5*(a[x1]*b[x2]-a[x2]*b[x1]);
+cornelius.cpp:    double *o = lines[i]->get_out();
+cornelius.cpp:      Vout[j] = o[j] - centroid[j];
+cornelius.cpp:    double *p1 = lines[i]->get_start();
+cornelius.cpp:    double *p2 = lines[i]->get_end();
+cornelius.cpp:  //Here we fix the non-constant indices
+cornelius.cpp:    Ntetrahedra += p->get_Nlines();
+cornelius.cpp:      int Nlines1 = p->get_Nlines();
+cornelius.cpp:      int Nlines2 = polygons[i]->get_Nlines();
+cornelius.cpp:      Line **lines1 = p->get_lines();
+cornelius.cpp:      Line **lines2 = polygons[i]->get_lines();
+cornelius.cpp:            Ntetrahedra += p->get_Nlines();
+cornelius.cpp:  double eps = 1e-10;
+cornelius.cpp:  double *p11 = l1->get_start();
+cornelius.cpp:  double *p12 = l1->get_end();
+cornelius.cpp:  double *p21 = l2->get_start();
+cornelius.cpp:    diff1 += fabs(p11[i]-p21[i]);
+cornelius.cpp:    diff2 += fabs(p12[i]-p21[i]);
+cornelius.cpp:  double bc01 = b[0]*c[1]-b[1]*c[0];
+cornelius.cpp:  double bc02 = b[0]*c[2]-b[2]*c[0];
+cornelius.cpp:  double bc03 = b[0]*c[3]-b[3]*c[0];
+cornelius.cpp:  double bc12 = b[1]*c[2]-b[2]*c[1];
+cornelius.cpp:  double bc13 = b[1]*c[3]-b[3]*c[1];
+cornelius.cpp:  double bc23 = b[2]*c[3]-b[3]*c[2];
+cornelius.cpp:  n[0] =  1.0/6.0*(a[1]*bc23 - a[2]*bc13 + a[3]*bc12);
+cornelius.cpp:  n[1] = -1.0/6.0*(a[0]*bc23 - a[2]*bc03 + a[3]*bc02);
+cornelius.cpp:  n[2] =  1.0/6.0*(a[0]*bc13 - a[1]*bc03 + a[3]*bc01);
+cornelius.cpp:  n[3] = -1.0/6.0*(a[0]*bc12 - a[1]*bc02 + a[2]*bc01);
+cornelius.cpp:  /*n[0] =  1.0/6.0*(a[1]*(b[2]*c[3]-b[3]*c[2]) - a[2]*(b[1]*c[3]-b[3]*c[1])
+cornelius.cpp:                  +a[3]*(b[1]*c[2]-b[2]*c[1]));
+cornelius.cpp:  n[1] = -1.0/6.0*(a[0]*(b[2]*c[3]-b[3]*c[2]) - a[2]*(b[0]*c[3]-b[3]*c[0])
+cornelius.cpp:                  +a[3]*(b[0]*c[2]-b[2]*c[0]));
+cornelius.cpp:  n[2] =  1.0/6.0*(a[0]*(b[1]*c[3]-b[3]*c[1]) - a[1]*(b[0]*c[3]-b[3]*c[0])
+cornelius.cpp:                  +a[3]*(b[0]*c[1]-b[1]*c[0]));
+cornelius.cpp:  n[3] = -1.0/6.0*(a[0]*(b[1]*c[2]-b[2]*c[1]) - a[1]*(b[0]*c[2]-b[2]*c[0])
+cornelius.cpp:                  +a[2]*(b[0]*c[1]-b[1]*c[0]));*/
+cornelius.cpp:    int Nlines = polygons[i]->get_Nlines();
+cornelius.cpp:    Line **lines = polygons[i]->get_lines();
+cornelius.cpp:      double *p1 = lines[j]->get_start();
+cornelius.cpp:      double *p2 = lines[j]->get_end();
+cornelius.cpp:    int Nlines = polygons[i]->get_Nlines();
+cornelius.cpp:    Line **lines = polygons[i]->get_lines();
+cornelius.cpp:    double *cent = polygons[i]->get_centroid();
+cornelius.cpp:      double *p1 = lines[j]->get_start();
+cornelius.cpp:      double *p2 = lines[j]->get_end();
+cornelius.cpp:        a[k] = p1[k] - mean[k];
+cornelius.cpp:        b[k] = p2[k] - mean[k];
+cornelius.cpp:        c[k] = cent[k] - mean[k];
+cornelius.cpp:    int Nlines = polygons[i]->get_Nlines();
+cornelius.cpp:    Line **lines = polygons[i]->get_lines();
+cornelius.cpp:    double *cent = polygons[i]->get_centroid();
+cornelius.cpp:      double *p1 = lines[j]->get_start();
+cornelius.cpp:      double *p2 = lines[j]->get_end();
+cornelius.cpp:        a[k] = p1[k] - centroid[k];
+cornelius.cpp:        b[k] = p2[k] - centroid[k];
+cornelius.cpp:        c[k] = cent[k] - centroid[k];
+cornelius.cpp:      double *o = lines[j]->get_out();
+cornelius.cpp:        Vout[k] = o[k] - centroid[k];
+cornelius.cpp:  const_i     = new int[DIM-SQUARE_DIM];
+cornelius.cpp:  const_value = new double[DIM-SQUARE_DIM];
+cornelius.cpp:  for (int i=0; i < DIM-SQUARE_DIM; i++) {
+cornelius.cpp:  for (int i=0; i < DIM-SQUARE_DIM; i++) {
+cornelius.cpp:  x1 = -1;
+cornelius.cpp:  x2 = -1;
+cornelius.cpp:  for (int i=0; i < DIM-SQUARE_DIM; i++) {
+cornelius.cpp:    for (int j=0; j < DIM-SQUARE_DIM; j++) {
+cornelius.cpp: *    -----
+cornelius.cpp: *    -----
+cornelius.cpp:  if ( (points[0][0]-E0)*(points[1][0]-E0) < 0 ) {
+cornelius.cpp:    cuts[Ncuts][0] = (points[0][0]-E0)/(points[0][0]-points[1][0])*dx[x1];
+cornelius.cpp:    cuts[Ncuts][0] = 1e-9*dx[x1];
+cornelius.cpp:    cuts[Ncuts][0] = (1.0-1e-9)*dx[x1];
+cornelius.cpp:  if ( (points[0][0]-E0)*(points[0][1]-E0) < 0 ) {
+cornelius.cpp:    cuts[Ncuts][1] = (points[0][0]-E0)/(points[0][0]-points[0][1])*dx[x2];
+cornelius.cpp:    cuts[Ncuts][1] = 1e-9*dx[x2];
+cornelius.cpp:    cuts[Ncuts][1] = (1.0-1e-9)*dx[x2];
+cornelius.cpp:  if ( (points[1][0]-E0)*(points[1][1]-E0) < 0 ) {
+cornelius.cpp:    cuts[Ncuts][1] = (points[1][0]-E0)/(points[1][0]-points[1][1])*dx[x2];
+cornelius.cpp:    cuts[Ncuts][1] = 1e-9*dx[x2];
+cornelius.cpp:    cuts[Ncuts][1] = (1.0-1e-9)*dx[x2];
+cornelius.cpp:  if ( (points[0][1]-E0)*(points[1][1]-E0) < 0 ) {
+cornelius.cpp:    cuts[Ncuts][0] = (points[0][1]-E0)/(points[0][1]-points[1][1])*dx[x1];
+cornelius.cpp:    cuts[Ncuts][0] = 1e-9*dx[x1];
+cornelius.cpp:    cuts[Ncuts][0] = (1.0-1e-9)*dx[x1];
+cornelius.cpp:    if ( (Emid-E0) < 0 ) {
+cornelius.cpp:      if ( (points[0][0]-E0) < 0 ) {
+cornelius.cpp: * This class handles 3d-cubes. Splits them into squares and collects
+cornelius.cpp:  //Here we fix the non-zero indices
+cornelius.cpp:  x1 = -1;
+cornelius.cpp:  x2 = -1;
+cornelius.cpp:  x3 = -1;
+cornelius.cpp:      double *p = lines[Nlines]->get_start();
+cornelius.cpp:      p = lines[Nlines]->get_end();
+cornelius.cpp:      if ( Nlines - used < 3 ) {
+cornelius.cpp:        cout << "Error: cannot construct polygon from " << Nlines -used << " lines" << endl;
+cornelius.cpp: * ambiguous, non-zero if ambiguous.
+cornelius.cpp: * @return Zero if not ambiguous, non-zero if ambiguous
+cornelius.cpp: * This class handles 4d-cubes. Splits them into cubes and collects the
+cornelius.cpp:  //Here we fix the non-zero indices
+cornelius.cpp:      points = 16-points;
+cornelius.cpp: * A class for finding a constant value surface from a 2-4 dimensional
+cornelius.cpp:    if ( i < DIM-cube_dim ) {
+cornelius.cpp:      dx[i] = dex[i-(DIM-cube_dim)];
+cornelius.cpp: * Finds the surface elements in 2-dimensional case.
+cornelius.cpp: * Finds the surface elements in 3-dimensional case.
+cornelius.cpp: * Finds the surface elements in 3-dimensional case and prints the actual triangles
+cornelius.cpp: * Finds the surface elements in 3-dimensional case.
+cornelius.cpp:    //Here we always work with 4-dimensions
+cornelius.cpp: * Finds the surface elements in 4-dimensional case.
+cornelius.cpp: * first (4-dimension) elements are zero. Note that this function allocates memory and
+cornelius.cpp: * first (4-dimension) elements are zero. This gives \sigma_\mu without
+cornelius.cpp: * factors(sqrt(-g)) from the metric. Note that this function allocates memory and
+cornelius.cpp:      vect[i][j] = centroids[i][j+(DIM-cube_dim)];
+cornelius.cpp: * factors(sqrt(-g)) from the metric. Note that this function allocates memory and
+cornelius.cpp:      vect[i][j] = normals[i][j+(DIM-cube_dim)];
+cornelius.cpp:  return centroids[i][j+(DIM-cube_dim)];
+cornelius.cpp: * (sqrt(-g)) from the metric.
+cornelius.cpp:  return normals[i][j+(DIM-cube_dim)];
+dissipative.cpp:                     - grid_pt_prev.Wmunu[idx_1d_alpha0])/DATA.delta_tau;
+dissipative.cpp:        double gfac = (alpha == 0 ? -1.0 : 0.0);
+dissipative.cpp:        dPidtau = ((Pi_alpha0 - grid_pt_prev.pi_b
+dissipative.cpp:    auto Wmunu = Util::UnpackVecToMatrix(grid_pt->Wmunu);
+dissipative.cpp:        epsilon = grid_pt->epsilon;
+dissipative.cpp:        rhob = grid_pt->rhob;
+dissipative.cpp:        epsilon = grid_pt_prev->epsilon;
+dissipative.cpp:        rhob = grid_pt_prev->rhob;
+dissipative.cpp:    shear = (shear_to_s)*(epsilon + pressure)/(T + 1e-15);
+dissipative.cpp:    double tau_pi = 5.0*shear/(epsilon + pressure + 1e-15);
+dissipative.cpp:    // transport coefficient for nonlinear terms -- shear only terms
+dissipative.cpp:    // -- coupling to bulk viscous pressure
+dissipative.cpp:    // transport coefficients not yet known -- fixed to zero
+dissipative.cpp:    /* third step in the split-operator time evol 
+dissipative.cpp:    tempf = (-(1.0 + transport_coefficient2*theta_local)*(Wmunu[mu][nu]));
+dissipative.cpp:    //           Navier-Stokes Term -- -2.*shear*sigma^munu                //
+dissipative.cpp:    // full Navier-Stokes term is
+dissipative.cpp:    NS_term = - 2.*shear*sigma[mu][nu];
+dissipative.cpp:    //     double gmunu[4][4] = {{-1., 0., 0., 0.},
+dissipative.cpp:    //     double gamma = grid_pt->u[0];
+dissipative.cpp:    //     double ueta  = grid_pt->u[3];
+dissipative.cpp:    //                 (grid_pt->dUsup[a][b]
+dissipative.cpp:    //                  - grid_pt->dUsup[b][a])/2.
+dissipative.cpp:    //                                - gmunu[b][0]*gmunu[a][3])
+dissipative.cpp:    //                 - ueta*gamma/tau/2.
+dissipative.cpp:    //                   *(  gmunu[a][3]*grid_pt->u[b]
+dissipative.cpp:    //                     - gmunu[b][3]*grid_pt->u[a])
+dissipative.cpp:    //                   *(   gmunu[a][0]*grid_pt->u[b]
+dissipative.cpp:    //                      - gmunu[b][0]*grid_pt->u[a])
+dissipative.cpp:    //                 + (  grid_pt->u[a]*a_local[b]
+dissipative.cpp:    //                    - grid_pt->u[b]*a_local[a])/2.);
+dissipative.cpp:    //     double term1_Vorticity = (- Wmunu[mu][0]*omega[nu][0]
+dissipative.cpp:    //                               - Wmunu[nu][0]*omega[mu][0]
+dissipative.cpp:    //                  Add nonlinear term in shear-stress tensor                //
+dissipative.cpp:             - 2.*(  Wmunu[0][1]*sigma[0][1]
+dissipative.cpp:        double term1_Wsigma = ( - Wmunu[mu][0]*sigma[nu][0]
+dissipative.cpp:                                - Wmunu[nu][0]*sigma[mu][0]
+dissipative.cpp:        double term2_Wsigma = (-(1./3.)*(DATA.gmunu[mu][nu]
+dissipative.cpp:                                         + grid_pt->u[mu]
+dissipative.cpp:                                           *grid_pt->u[nu])*Wsigma);
+dissipative.cpp:        Wsigma_term = -term1_Wsigma - term2_Wsigma;
+dissipative.cpp:    //              Add nonlinear term in shear-stress tensor               //
+dissipative.cpp:                   - 2.*(  Wmunu[0][1]*Wmunu[0][1]
+dissipative.cpp:        double term1_WW = ( - Wmunu[mu][0]*Wmunu[nu][0]
+dissipative.cpp:        double term2_WW = (-(1./3.)*(DATA.gmunu[mu][nu]
+dissipative.cpp:                                     + grid_pt->u[mu]*grid_pt->u[nu])*Wsquare);
+dissipative.cpp:        WW_term = -term1_WW - term2_WW;
+dissipative.cpp:        double Bulk_Sigma = grid_pt->pi_b*sigma[mu][nu];
+dissipative.cpp:        double Bulk_W = grid_pt->pi_b*Wmunu[mu][nu];
+dissipative.cpp:        Coupling_to_Bulk = -Bulk_Sigma_term + Bulk_W_term;
+dissipative.cpp:    /* Kurganov-Tadmor for Wmunu */
+dissipative.cpp:                        - (1/tau)partial_eta (ueta Wmn)
+dissipative.cpp:                        - partial_x (ux Wmn) - partial_y (uy Wmn) 
+dissipative.cpp:                        - utau Wmn/tau + SW*/
+dissipative.cpp:       H_{j+1/2} = (fRph + fLph)/2 - ax(uRph - uLph) 
+dissipative.cpp:          double uWphR = fp1 - 0.5*minmod.minmod_dx(fp2, fp1, f);
+dissipative.cpp:          double uWmhR = f - temp;
+dissipative.cpp:          double WphR = gp1 - 0.5*minmod.minmod_dx(gp2, gp1, g);
+dissipative.cpp:          double WmhR = g - temp;
+dissipative.cpp:          double HWph = ((uWphR + uWphL) - ax*(WphR - WphL))*0.5;
+dissipative.cpp:          double HWmh = ((uWmhR + uWmhL) - ax*(WmhR - WmhL))*0.5;
+dissipative.cpp:          double HW = (HWph - HWmh)/delta[direction];
+dissipative.cpp:          sum += -HW;
+dissipative.cpp:      /* add a source term -u^tau Wmn/tau
+dissipative.cpp:         due to the coordinate change to tau-eta */
+dissipative.cpp:      /* this is from udW = d(uW) - Wdu = RHS */
+dissipative.cpp:      /* this term is being added to the rhs so that -4/3 + 1 = -1/3 */
+dissipative.cpp:      /* other source terms due to the coordinate change to tau-eta */
+dissipative.cpp:      // align gmunu in data for faster access - also changed **gmunu in data to gmunu[4][4]
+dissipative.cpp:          //   - (((init_data*)(&mydata))->gmunu[3][mu])*(Wmunu_local[0][nu]) //TODO: Ask Bjorn about this
+dissipative.cpp:         - (DATAaligned->gmunu[3][mu])*(Wmunu_local[0][nu])
+dissipative.cpp:         - (DATAaligned->gmunu[3][nu])*(Wmunu_local[0][mu])
+dissipative.cpp:         + (DATAaligned->gmunu[0][mu])*(Wmunu_local[3][nu])
+dissipative.cpp:         + (DATAaligned->gmunu[0][nu])*(Wmunu_local[3][mu])
+dissipative.cpp:         - (Wmunu_local[0][nu])
+dissipative.cpp:         - (Wmunu_local[0][mu])
+dissipative.cpp:        const double ic_fac = (ic == 0 ? -1.0 : 1.0);
+dissipative.cpp:      w_rhs[mu][nu] += tempf*(DATAaligned->delta_tau)
+dissipative.cpp:        + (- (grid_pt.u[0]*Wmunu_local[mu][nu])/tau + (theta_local*Wmunu_local[mu][nu]))*(DATAaligned->delta_tau);
+dissipative.cpp:    /* Kurganov-Tadmor for Wmunu */
+dissipative.cpp:                        - (1/tau)partial_eta (ueta Wmn)
+dissipative.cpp:                        - partial_x (ux Wmn) - partial_y (uy Wmn) 
+dissipative.cpp:                        - utau Wmn/tau + SW*/
+dissipative.cpp:       H_{j+1/2} = (fRph + fLph)/2 - ax(uRph - uLph) 
+dissipative.cpp:        double uWphR = fp1 - 0.5*minmod.minmod_dx(fp2, fp1, f);
+dissipative.cpp:        double uWmhR = f - temp;
+dissipative.cpp:        double WphR = gp1 - 0.5*minmod.minmod_dx(gp2, gp1, g);
+dissipative.cpp:        double WmhR = g - temp;
+dissipative.cpp:        double HWph = ((uWphR + uWphL) - ax*(WphR - WphL))*0.5;
+dissipative.cpp:        double HWmh = ((uWmhR + uWmhL) - ax*(WmhR - WmhL))*0.5;
+dissipative.cpp:        double HW = (HWph - HWmh)/delta[direction];
+dissipative.cpp:        sum += -HW;
+dissipative.cpp:    /* add a source term -u^tau Wmn/tau
+dissipative.cpp:       due to the coordinate change to tau-eta */
+dissipative.cpp:    /* this is from udW = d(uW) - Wdu = RHS */
+dissipative.cpp:    /* this term is being added to the rhs so that -4/3 + 1 = -1/3 */
+dissipative.cpp:    /* other source terms due to the coordinate change to tau-eta */
+dissipative.cpp:    // align gmunu in data for faster access - also changed **gmunu in data to gmunu[4][4]
+dissipative.cpp:          //   - (((init_data*)(&mydata))->gmunu[3][mu])*(Wmunu_local[0][nu]) //TODO: Ask Bjorn about this
+dissipative.cpp:         - (DATAaligned->gmunu[3][mu])*(Wmunu_local[0][nu])
+dissipative.cpp:         - (DATAaligned->gmunu[3][nu])*(Wmunu_local[0][mu])
+dissipative.cpp:         + (DATAaligned->gmunu[0][mu])*(Wmunu_local[3][nu])
+dissipative.cpp:         + (DATAaligned->gmunu[0][nu])*(Wmunu_local[3][mu])
+dissipative.cpp:         - (Wmunu_local[0][nu])
+dissipative.cpp:         - (Wmunu_local[0][mu])
+dissipative.cpp:        const double ic_fac = (ic == 0 ? -1.0 : 1.0);
+dissipative.cpp:    w_rhs += (tempf*(DATAaligned->delta_tau)
+dissipative.cpp:              + (- (grid_pt.u[0]*Wmunu_local[mu][nu])/tau
+dissipative.cpp:                 + (theta_local*Wmunu_local[mu][nu]))*(DATAaligned->delta_tau));
+dissipative.cpp:    /* Kurganov-Tadmor for Pi */
+dissipative.cpp:      partial_tau (utau Pi) = -
+dissipative.cpp:      (1/tau)partial_eta (ueta Pi) - partial_x (ux Pi) - partial_y (uy Pi)
+dissipative.cpp:      - utau Pi/tau + SP 
+dissipative.cpp:       H_{j+1/2} = (fRph + fLph)/2 - ax(uRph - uLph) 
+dissipative.cpp:        double uPiphR = fp1 - 0.5*minmod.minmod_dx(fp2, fp1, f);
+dissipative.cpp:        double uPimhR = f - temp;
+dissipative.cpp:        double PiphR = gp1 - 0.5*minmod.minmod_dx(gp2, gp1, g);
+dissipative.cpp:        double PimhR = g - temp;
+dissipative.cpp:        /* MakePimnCurrents following Kurganov-Tadmor */
+dissipative.cpp:        double HPiph = ((uPiphR + uPiphL) - ax*(PiphR - PiphL))*0.5;
+dissipative.cpp:        double HPimh = ((uPimhR + uPimhL) - ax*(PimhR - PimhL))*0.5;
+dissipative.cpp:        double HPi = (HPiph - HPimh)/delta[direction];
+dissipative.cpp:        sum += -HPi;
+dissipative.cpp:     /* add a source term due to the coordinate change to tau-eta */
+dissipative.cpp:     sum -= (grid_pt->pi_b)*(grid_pt->u[0])/tau;
+dissipative.cpp:     sum += (grid_pt->pi_b)*theta_local;
+dissipative.cpp:    // switch to include non-linear coupling terms in the bulk pi evolution
+dissipative.cpp:        epsilon = grid_pt->epsilon;
+dissipative.cpp:        rhob = grid_pt->rhob;
+dissipative.cpp:        epsilon = grid_pt_prev->epsilon;
+dissipative.cpp:        rhob = grid_pt_prev->rhob;
+dissipative.cpp:    Bulk_Relax_time = (1./(14.55*(1./3. - cs2)*(1./3. - cs2))
+dissipative.cpp:    transport_coeff1_s = 8./5.*(1./3.-cs2)*Bulk_Relax_time;
+dissipative.cpp:    // Computing Navier-Stokes term (-bulk viscosity * theta)
+dissipative.cpp:    NS_term = -bulk*theta_local;
+dissipative.cpp:    // - Bulk - transport_coeff1*Bulk*theta
+dissipative.cpp:    tempf = (-(grid_pt->pi_b)
+dissipative.cpp:             - transport_coeff1*theta_local*(grid_pt->pi_b));
+dissipative.cpp:        BB_term = (transport_coeff2*(grid_pt->pi_b)
+dissipative.cpp:                   *(grid_pt->pi_b));
+dissipative.cpp:    // Computing terms that Couple with shear-stress tensor
+dissipative.cpp:	    auto Wmunu = Util::UnpackVecToMatrix(grid_pt->Wmunu);
+dissipative.cpp:                  - 2.*(  Wmunu[0][1]*sigma[0][1]
+dissipative.cpp:               - 2.*(  Wmunu[0][1]*Wmunu[0][1]
+dissipative.cpp:        Coupling_to_Shear = -Shear_Sigma_term + Shear_Shear_term ;
+dissipative.cpp:    -(1/tau_rho)(q[a] + kappa g[a][b]Dtildemu[b]
+dissipative.cpp:    -Delta[a][eta] u[eta] q[tau]/tau
+dissipative.cpp:    -u[a]u[b]g[b][e] Dq[e]
+dissipative.cpp:        epsilon = grid_pt->epsilon;
+dissipative.cpp:        rhob = grid_pt->rhob;
+dissipative.cpp:        epsilon = grid_pt_prev->epsilon;
+dissipative.cpp:        rhob = grid_pt_prev->rhob;
+dissipative.cpp:    double tau_rho = kappa_coefficient/(T + 1e-15);
+dissipative.cpp:    double kappa   = kappa_coefficient*(rhob/(3.*T*tanh(alpha) + 1e-15)
+dissipative.cpp:                                      - rhob*rhob/(epsilon + pressure));
+dissipative.cpp:        q[i] = grid_pt->Wmunu[10+i];
+dissipative.cpp:    /* -(1/tau_rho)(q[a] + kappa g[a][b]Dtildemu[b] 
+dissipative.cpp:     * + theta q[a] - q[a] u^\tau/tau
+dissipative.cpp:     * - Delta[a][eta] u[eta] q[tau]/tau
+dissipative.cpp:     * - u[a] u[b]g[b][e] Dq[e] -> u[a] q[e] g[e][b] Du[b]
+dissipative.cpp:    // and dUsup[4][0] = -partial_tau (muB/T) = partial^tau (muB/T)
+dissipative.cpp:    // -(1/tau_rho)(q[a] + kappa g[a][b]DmuB/T[b]
+dissipative.cpp:    double NS = kappa*(baryon_diffusion_vec[nu] + grid_pt->u[nu]*a_local[4]);
+dissipative.cpp:    // add a new non-linear term (- q \theta)
+dissipative.cpp:    double Nonlinear1 = -transport_coeff*q[nu]*theta_local;
+dissipative.cpp:    // add a new non-linear term (-q^\mu \sigma_\mu\nu)
+dissipative.cpp:    double transport_coeff_2 = 3./5.*tau_rho;   // from 14-momentum massless
+dissipative.cpp:    double Nonlinear2 = - transport_coeff_2*temptemp;
+dissipative.cpp:    double SW = (-q[nu] - NS + Nonlinear1 + Nonlinear2)/(tau_rho + 1e-15);
+dissipative.cpp:        SW = (-q[nu] - NS)/(tau_rho + 1e-15);
+dissipative.cpp:    // + theta q[a] - q[a] u^\tau/tau
+dissipative.cpp:    SW += (theta_local - grid_pt->u[0]/tau)*q[nu];
+dissipative.cpp:                    + grid_pt->u[nu]*grid_pt->u[0])
+dissipative.cpp:                      *grid_pt->u[3]*q[3]/tau
+dissipative.cpp:                    - (DATA.gmunu[nu][3]
+dissipative.cpp:                       + grid_pt->u[nu]*grid_pt->u[3])
+dissipative.cpp:                      *grid_pt->u[3]*q[0]/tau);
+dissipative.cpp:    // -u[a] u[b]g[b][e] Dq[e] -> u[a] (q[e] g[e][b] Du[b])
+dissipative.cpp:    SW += (grid_pt->u[nu])*tempf;
+dissipative.cpp:    /* Kurganov-Tadmor for q */
+dissipative.cpp:      - (1/tau)partial_eta (ueta qmu) - partial_x (ux qmu) - partial_y (uy qmu) 
+dissipative.cpp:      - utau qmu/tau 
+dissipative.cpp:       H_{j+1/2} = (fRph + fLph)/2 - ax(uRph - uLph) 
+dissipative.cpp:        double uWphR = fp1 - 0.5*minmod.minmod_dx(fp2, fp1, f);
+dissipative.cpp:        double uWmhR = f - temp;
+dissipative.cpp:        double WphR = gp1 - 0.5*minmod.minmod_dx(gp2, gp1, g);
+dissipative.cpp:        double WmhR = g - temp;
+dissipative.cpp:        double HWph = ((uWphR + uWphL) - ax*(WphR - WphL))*0.5;
+dissipative.cpp:        double HWmh = ((uWmhR + uWmhL) - ax*(WmhR - WmhL))*0.5;
+dissipative.cpp:        double HW = (HWph - HWmh)/delta[direction];
+dissipative.cpp:        sum += -HW;
+dissipative.cpp:    /* add a source term -u^tau Wmn/tau due to the coordinate 
+dissipative.cpp:     * change to tau-eta */
+dissipative.cpp:    /* this is from udW = d(uW) - Wdu = RHS */
+dissipative.cpp:     * sum -= (grid_pt->u[rk_flag][0])*(grid_pt->Wmunu[rk_flag][mu][nu])/tau;
+dissipative.cpp:     * sum += (grid_pt->theta_u[rk_flag])*(grid_pt->Wmunu[rk_flag][mu][nu]);
+dissipative.cpp://        shear_to_s = (DATA.shear_to_s + 0.0594*(1. - Tfrac)
+dissipative.cpp://                      + 0.544*(1. - Tfrac*Tfrac));
+dissipative.cpp://        shear_to_s = (DATA.shear_to_s + 0.288*(Tfrac - 1.)
+dissipative.cpp://                      + 0.0818*(Tfrac*Tfrac - 1.));
+dissipative.cpp:    double etascrv = -0.48;
+dissipative.cpp:    shear_to_s = etasmin + etasslope*(T - Tc)*pow(T/Tc,etascrv);
+dissipative.cpp://    double A1=-13.77, A2=27.55, A3=13.45;
+dissipative.cpp://    double bulk = A1*dummy*dummy + A2*dummy - A3;
+dissipative.cpp://        bulk = (lambda3*exp((dummy-1)/sigma3)
+dissipative.cpp://                + lambda4*exp((dummy-1)/sigma4) + 0.03);
+dissipative.cpp://        bulk = (lambda1*exp(-(dummy-1)/sigma1)
+dissipative.cpp://                + lambda2*exp(-(dummy-1)/sigma2) + 0.001);
+dissipative.cpp:    //double A1=-79.53, A2=159.067, A3=79.04;
+dissipative.cpp:    //bulk = A1*dummy*dummy + A2*dummy - A3;
+dissipative.cpp:    //    bulk = (lambda3*exp((dummy-1)/sigma3)
+dissipative.cpp:    //            + lambda4*exp((dummy-1)/sigma4) + 0.03);
+dissipative.cpp:    //    bulk = (lambda1*exp(-(dummy-1)/sigma1)
+dissipative.cpp:    //            + lambda2*exp(-(dummy-1)/sigma2) + 0.001);
+dissipative.cpp:    //    bulk = (lambda3*exp((dummy-1)/sigma3)
+dissipative.cpp:    //            + lambda4*exp((dummy-1)/sigma4) + 0.03);
+dissipative.cpp:    //    bulk = 0.901*exp(14.5*(1.0-dummy)) + 0.061/dummy/dummy;
+dissipative.cpp:    double bulk = zsmax / (1 + pow((temperature - T0)/zsw,2));
+dissipative.cpp:    double e_min = 1e-5;     // fm^-4
+dissipative.cpp:    double e_max = 100.0;    // fm^-4
+dissipative.cpp:    double de = (e_max - e_min)/(ne - 1.);
+dissipative.cpp:    double rhob_min = 0.0;   // fm^-3
+dissipative.cpp:    double rhob_max = sqrt(10.0);  // fm^-3
+dissipative.cpp:    double drhob = (rhob_max - rhob_min)/(nrhob - 1.);
+dissipative.cpp:                    *(rhob_local/(3.*T_local*tanh(alpha_local) + 1e-15)
+dissipative.cpp:                      - rhob_local*rhob_local/(e_local + p_local)));
+dissipative.cpp:    int ns = static_cast<int>((s_max - s_0)/ds) + 1;
+dissipative.cpp:                    *(nB_local/(3.*temperature*tanh(alpha_local) + 1e-15)
+dissipative.cpp:                      - nB_local*nB_local/(e_local + p_local)));
+dissipative.cpp:    double e_min    = 1e-5;     // fm^-4
+dissipative.cpp:    double e_max    = 100.0;    // fm^-4
+dissipative.cpp:    double de       = (e_max - e_min)/(ne - 1.);
+dissipative.cpp:    double rhob_min = 0.0;   // fm^-3
+dissipative.cpp:    double rhob_max = sqrt(10.0);  // fm^-3
+dissipative.cpp:    double drhob    = (rhob_max - rhob_min)/(nrhob - 1.);
+dissipative.cpp:    int ns = static_cast<int>((s_max - s_0)/ds) + 1;
+emoji.cpp://! this is a class that includes ascii-emoji strings.
+emoji.cpp://! I took the text from https://github.com/dysfunc/ascii-emoji
+emoji.cpp:std::string fuck_it           () {return("t(-_-t)");}
+emoji.cpp:std::string zombie            () {return("[¬º-°]¬");}
+eos.cpp:        music_message.info("Using EOS-Q from AZHYDRO");
+eos.cpp:            "Using lattice EOS from Huovinen/Petreczky s95p-v1.2 (for UrQMD)");
+eos.cpp:             << ". Use EOS_to_use = 0 (ideal gas) 1 (AZHYDRO EOS-Q), "
+eos.cpp:             << "2 (s95p-v1), 3 (s95p-PCE150-v1), 4 (s95p-PCE155-v1), "
+eos.cpp:             << "5 (s95p-PCE160-v1), 6 (s95p-PCE165-v1),"
+eos.cpp:             << "7 (s95p-v1.2), "
+eos.cpp:        std::ifstream eos_p(envPath + "/EOS/EOS-Q/aa"
+eos.cpp:        std::ifstream eos_T(envPath + "/EOS/EOS-Q/aa"
+eos.cpp:        std::ifstream eos_mub(envPath + "/EOS/EOS-Q/aa"
+eos.cpp:        spath << "/EOS/s95p-v1/";
+eos.cpp:        spath << "/EOS/s95p-PCE-v1/";
+eos.cpp:        spath << "/EOS/s95p-PCE155/";
+eos.cpp:        spath << "/EOS/s95p-PCE160/";
+eos.cpp:        spath << "/EOS/s95p-PCE165-v0/";
+eos.cpp:        spath << "/EOS/s95p-v1.2/";
+eos.cpp:        spath << "s95p-v1_";
+eos.cpp:        spath << "s95p-v1.2_";
+eos.cpp:        for (int j = e_length[itable] - 1; j >= 0; j--) {
+eos.cpp:    slocalpath << "./EOS/s95p-finite_muB/";
+eos.cpp:        for (int j = N_e; j >= 0; j--) {
+eos.cpp:   double dpde = (pR - pL)/(eRight - eLeft);
+eos.cpp:    double rhobLeft  = rhob - deltaRhob*0.5;
+eos.cpp:    double dpdrho = (pR - pL)/(rhobRight - rhobLeft);  // 1/fm
+eos.cpp:    double v_sound = dpde + rhob/(e + pressure + 1e-15)*dpdrho;
+eos.cpp:	cs2_local = ((5.191934309650155e-32 + 4.123605749683891e-23*e1
+eos.cpp:                 + 3.1955868410879504e-16*e2 + 1.4170364808063119e-10*e3
+eos.cpp:                 + 6.087136671592452e-6*e4 + 0.02969737949090831*e5
+eos.cpp:                 + 0.03009027913262399*e12 + 8.189430244031285e-6*e13)
+eos.cpp:		        /(1.4637868900982493e-30 + 6.716598285341542e-22*e1
+eos.cpp:                  + 3.5477700458515908e-15*e2 + 1.1225580509306008e-9*e3
+eos.cpp:	p = ((  1.9531729608963267e-11*e12 + 3.1188455176941583e-7*e11
+eos.cpp:          - 0.25181736420168666)
+eos.cpp:         /(  3.2581066229887368e-18*e12 + 5.928138360995685e-11*e11
+eos.cpp:           + 9.601103399348206e-7*e10 + 0.002962497695527404*e9
+eos.cpp:    p = std::max(1e-16, p);
+eos.cpp:	temperature = ((1.510073201405604e-29 + 8.014062800678687e-18*e1
+eos.cpp:                    + 2.4954778310451065e-10*e2 + 0.000063810382643387*e3
+eos.cpp:                    + 0.015421252394182246*e10 + 1.5780479034557783e-6*e11)
+eos.cpp:                   /(7.558667139355393e-28 + 1.3686372302041508e-16*e1
+eos.cpp:                     + 2.998130743142826e-9*e2 + 0.0005036835870305458*e3
+eos.cpp:                     + 0.003778342768228011*e10 + 1.8472801679382593e-7*e11));
+eos.cpp:            return(itable - 1);
+eos.cpp:    return(number_of_tables - 1);
+eos.cpp:// as two-dimensional arrays on an equally spacing lattice grid
+eos.cpp:    int idx_e  = static_cast<int>((local_ed - e0)/delta_e);
+eos.cpp:    int idx_nb = static_cast<int>((local_nb - nb0)/delta_nb);
+eos.cpp:    idx_e  = std::min(N_e - 2, idx_e);
+eos.cpp:    idx_nb = std::min(N_nb - 2, idx_nb);
+eos.cpp:    double frac_e    = (local_ed - (idx_e*delta_e + e0))/delta_e;
+eos.cpp:    double frac_rhob = (local_nb - (idx_nb*delta_nb + nb0))/delta_nb;
+eos.cpp:    result = ((temp1*(1. - frac_e) + temp2*frac_e)*(1. - frac_rhob)
+eos.cpp:              + (temp3*frac_e + temp4*(1. - frac_e))*frac_rhob);
+eos.cpp:    result = std::max(result, 1e-15);
+eos.cpp:// as one-dimensional arrays on an equally spacing lattice grid
+eos.cpp:    int idx_e  = static_cast<int>((local_ed - e0)/delta_e);
+eos.cpp:    idx_e  = std::min(N_e - 2, idx_e);
+eos.cpp:    double frac_e    = (local_ed - (idx_e*delta_e + e0))/delta_e;
+eos.cpp:    result = temp1*(1. - frac_e) + temp2*frac_e;
+eos.cpp:    result = std::max(1e-15, result);
+eos.cpp:    return pow(90.0/M_PI/M_PI*(eps/3.0)/(2*(Nc*Nc-1)+7./2*Nc*Nf), .25);
+eos.cpp:    //e=T*T*T*T*(M_PI*M_PI*3.0*(2*(Nc*Nc-1)+7./2*Nc*Nf)/90.0);
+eos.cpp:    //s =4/3 T*T*T*(M_PI*M_PI*3.0*(2*(Nc*Nc-1)+7./2*Nc*Nf)/90.0);
+eos.cpp:    //T = pow(3. * s / 4. / (M_PI*M_PI*3.0*(2*(Nc*Nc-1)+7./2*Nc*Nf)/90.0), 1./3.);
+eos.cpp:    return 3./4.*s*pow(3.*s/4./(M_PI*M_PI*3.0*(2*(Nc*Nc-1)+7./2*Nc*Nf)/90.0), 1./3.); //in 1/fm^4
+eos.cpp:    double f = (epsilon + P - mu*rhob)/(T + 1e-15);
+eos.cpp:    return(std::max(1e-16, f));
+eos.cpp:    return(std::max(1e-15, T));
+eos.cpp:        double sign = rhob/(std::abs(rhob) + 1e-15);
+eos.cpp:        double sign = rhob/(std::abs(rhob) + 1e-15);
+eos.cpp:    // s - entropy density in 1/fm^3
+eos.cpp:    double e;  // epsilon - energy density
+eos.cpp:    double eps_lower = 1e-15;
+eos.cpp:    double rel_accuracy = 1e-8;
+eos.cpp:    double abs_accuracy = 1e-15;
+eos.cpp:    while (((eps_upper - eps_lower)/eps_mid > rel_accuracy
+eos.cpp:            && (eps_upper - eps_lower) > abs_accuracy) && iter < ntol) {
+eos.cpp:                eps_upper, eps_lower, (eps_upper - eps_lower));
+eos.cpp:    int idx_e = static_cast<int>((local_ed - eps0)/deltaEps);
+eos.cpp:    double frac_e = (local_ed - (idx_e*deltaEps + eps0))/deltaEps;
+eos.cpp:    idx_e = std::max(0, std::min(NEps - 2, idx_e));
+eos.cpp:    double frac_mub_left = (local_mub - mub_left_1)/(mub_left_2 - mub_left_1);
+eos.cpp:    double rhob_left     = (rhob_left_1*(1. - frac_mub_left)
+eos.cpp:    double frac_mub_right = ((local_mub - mub_right_1)
+eos.cpp:                             /(mub_right_2 - mub_right_1));
+eos.cpp:    double rhob_right = (rhob_right_1*(1. - frac_mub_right)
+eos.cpp:    double rhob = rhob_left*(1. - frac_e) + rhob_right*frac_e;   // 1/fm^3
+eos.cpp:    double e0 = 1e-3;
+eos.cpp:    int ne = (emax - e0)/de + 1;
+eos.cpp:        double e0 = 1e-3;
+eos.cpp:        int ne = (emax - e0)/de + 1;
+eos.cpp:        int nrhob = (rhob_max - rhob_0)/drhob + 1;
+eos.cpp:    int ne = static_cast<int>((e_max - e_0)/de) + 1;
+eos.cpp:    int nrhob = static_cast<int>((rhob_max - rhob_0)/drhob) + 1;
+eos.cpp:    int ns = static_cast<int>((s_max - s_0)/ds) + 1;
+evolve.cpp:            if (   fabs(tau - 1.0) < 1e-8 || fabs(tau - 1.2) < 1e-8
+evolve.cpp:                || fabs(tau - 1.5) < 1e-8 || fabs(tau - 2.0) < 1e-8
+evolve.cpp:                || fabs(tau - 3.0) < 1e-8) {
+evolve.cpp:            if (   fabs(tau -  1.0) < 1e-8 || fabs(tau -  2.0) < 1e-8
+evolve.cpp:                || fabs(tau -  5.0) < 1e-8 || fabs(tau - 10.0) < 1e-8
+evolve.cpp:                || fabs(tau - 20.0) < 1e-8) {
+evolve.cpp:                                            tau, -0.5, 0.5, *ap_current);
+evolve.cpp:                                            tau, -0.5, 0.5, *ap_current);
+evolve.cpp:        //determine freeze-out surface
+evolve.cpp:            // avoid freeze-out at the first time step
+evolve.cpp:            if ((it - it_start)%facTau == 0 && it > it_start) {
+evolve.cpp:    // control function for Runge-Kutta evolution in tau
+evolve.cpp:    // loop over Runge-Kutta steps
+evolve.cpp:        for (int ieta = 0; ieta < (neta-fac_eta); ieta += fac_eta) {
+evolve.cpp:    cornelius_ptr->init(dim, epsFO, lattice_spacing);
+evolve.cpp:    // initialize the hyper-cube for Cornelius
+evolve.cpp:    double eta = (DATA.delta_eta)*ieta - (DATA.eta_size)/2.0;
+evolve.cpp:    for (int ix = 0; ix < nx - fac_x; ix += fac_x) {
+evolve.cpp:        double x = ix*(DATA.delta_x) - (DATA.x_size/2.0);
+evolve.cpp:        for (int iy = 0; iy < ny - fac_y; iy += fac_y) {
+evolve.cpp:            double y = iy*(DATA.delta_y) - (DATA.y_size/2.0);
+evolve.cpp:	    if((ix > nx - 2*fac_x || iy > nx - 2*fac_x)
+evolve.cpp:            if ((arena_current(ix+fac_x,iy+fac_y,ieta+fac_eta).epsilon-epsFO)
+evolve.cpp:                *(arena_freezeout(ix,iy,ieta).epsilon-epsFO)>0.)
+evolve.cpp:                if((arena_current(ix+fac_x,iy,ieta).epsilon-epsFO)
+evolve.cpp:                    *(arena_freezeout(ix,iy+fac_y,ieta+fac_eta).epsilon-epsFO)>0.)
+evolve.cpp:                    if((arena_current(ix,iy+fac_y,ieta).epsilon-epsFO)
+evolve.cpp:                        *(arena_freezeout(ix+fac_x,iy,ieta+fac_eta).epsilon-epsFO)>0.)
+evolve.cpp:                        if((arena_current(ix,iy,ieta+fac_eta).epsilon-epsFO)
+evolve.cpp:                            *(arena_freezeout(ix+fac_x,iy+fac_y,ieta).epsilon-epsFO)>0.)
+evolve.cpp:                            if((arena_current(ix+fac_x,iy+fac_y,ieta).epsilon-epsFO)
+evolve.cpp:                                *(arena_freezeout(ix,iy,ieta+fac_eta).epsilon-epsFO)>0.)
+evolve.cpp:                                if((arena_current(ix+fac_x,iy,ieta+fac_eta).epsilon-epsFO)
+evolve.cpp:                                    *(arena_freezeout(ix,iy+fac_y,ieta).epsilon-epsFO)>0.)
+evolve.cpp:                                    if((arena_current(ix,iy+fac_y,ieta+fac_eta).epsilon-epsFO)
+evolve.cpp:                                        *(arena_freezeout(ix+fac_x,iy,ieta).epsilon-epsFO)>0.)
+evolve.cpp:                                        if((arena_current(ix,iy,ieta).epsilon-epsFO)
+evolve.cpp:                                            *(arena_freezeout(ix+fac_x,iy+fac_y,ieta+fac_eta).epsilon-epsFO)>0.)
+evolve.cpp:            // if intersect, prepare for the hyper-cube
+evolve.cpp:            cornelius_ptr->find_surface_4d(cube);
+evolve.cpp:            // get positions of the freeze-out surface
+evolve.cpp:            for (int isurf = 0; isurf < cornelius_ptr->get_Nelements();
+evolve.cpp:                    FULLSU[ii] = cornelius_ptr->get_normal_elem(isurf, ii);
+evolve.cpp:                // position of the freeze-out fluid cell
+evolve.cpp:                        cornelius_ptr->get_centroid_elem(isurf, ii);
+evolve.cpp:                        lattice_spacing[ii] - x_fraction[1][ii];
+evolve.cpp:                const double tau_center = tau - DTAU + x_fraction[1][0];
+evolve.cpp:                // perform 4-d linear interpolation for all fluid
+evolve.cpp:                // 4-dimension interpolation done
+evolve.cpp:    // this function freeze-out fluid cells between epsFO and epsFO_low
+evolve.cpp:    // on an equal time hyper-surface at the first time step
+evolve.cpp:            for (int ieta = 0; ieta < neta - fac_eta; ieta += fac_eta) {
+evolve.cpp:    double eta = (DATA.delta_eta)*ieta - (DATA.eta_size)/2.0;
+evolve.cpp:    for (int ix = 0; ix < nx - fac_x; ix += fac_x) {
+evolve.cpp:        double x = ix*(DATA.delta_x) - (DATA.x_size/2.0);
+evolve.cpp:        for (int iy = 0; iy < ny - fac_y; iy += fac_y) {
+evolve.cpp:            double y = iy*(DATA.delta_y) - (DATA.y_size/2.0);
+evolve.cpp:            // get positions of the freeze-out surface
+evolve.cpp:    // find boost-invariant hyper-surfaces
+evolve.cpp:        cornelius_ptr->init(dim, epsFO, lattice_spacing);
+evolve.cpp:        // initialize the hyper-cube for Cornelius
+evolve.cpp:        for (int ix=0; ix < nx - fac_x; ix += fac_x) {
+evolve.cpp:            double x = ix*(DATA.delta_x) - (DATA.x_size/2.0);
+evolve.cpp:            for (int iy=0; iy < ny - fac_y; iy += fac_y) {
+evolve.cpp:                double y = iy*(DATA.delta_y) - (DATA.y_size/2.0);
+evolve.cpp:		if((ix > nx - 2*fac_x || iy > nx - 2*fac_x)
+evolve.cpp:                if ((arena_current(ix+fac_x,iy+fac_y,0).epsilon-epsFO)
+evolve.cpp:                    *(arena_freezeout(ix,iy,0).epsilon-epsFO) > 0.)
+evolve.cpp:                    if ((arena_current(ix+fac_x,iy,0).epsilon-epsFO)
+evolve.cpp:                        *(arena_freezeout(ix,iy+fac_y,0).epsilon-epsFO) > 0.)
+evolve.cpp:                        if ((arena_current(ix,iy+fac_y,0).epsilon-epsFO)
+evolve.cpp:                            *(arena_freezeout(ix+fac_x,iy,0).epsilon-epsFO) > 0.)
+evolve.cpp:                            if ((arena_current(ix,iy,0).epsilon-epsFO)
+evolve.cpp:                                *(arena_freezeout(ix+fac_x,iy+fac_y,0).epsilon-epsFO) > 0.)
+evolve.cpp:                // if intersect, prepare for the hyper-cube
+evolve.cpp:                cornelius_ptr->find_surface_3d(cube);
+evolve.cpp:                // get positions of the freeze-out surface
+evolve.cpp:                for (int isurf = 0; isurf < cornelius_ptr->get_Nelements();
+evolve.cpp:                        FULLSU[ii] = cornelius_ptr->get_normal_elem(isurf, ii);
+evolve.cpp:                    // position of the freeze-out fluid cell
+evolve.cpp:                            cornelius_ptr->get_centroid_elem(isurf, ii));
+evolve.cpp:                            lattice_spacing[ii] - x_fraction[1][ii]);
+evolve.cpp:                    const double tau_center = tau - DTAU + x_fraction[1][0];
+evolve.cpp:                    // perform 3-d linear interpolation for all fluid quantities
+evolve.cpp:                    // 3-dimension interpolation done
+evolve.cpp:                        if(DATA.turn_on_diff)   // 29-32th column
+evolve.cpp:        // judge whether the entire fireball is freeze-out
+evolve.cpp:    double u_dot_q = - u[0]*q[0] + u[1]*q[1] + u[2]*q[2] + u[3]*q[3];
+evolve.cpp:    const double gmunu[4][4] = {{-1, 0, 0, 0},
+evolve.cpp:        u_dot_pi[i] = (- u[0]*Wmunu[0][i] + u[1]*Wmunu[1][i]
+evolve.cpp:    double tr_pi = - Wmunu[0][0] + Wmunu[1][1] + Wmunu[2][2] + Wmunu[3][3];
+evolve.cpp:                - 1./3.*(gmunu[i][j] + u[i]*u[j])*(tr_pi + u_dot_pi_dot_u));
+evolve.cpp:        double d_epsFO = ((freeze_max_ed - freeze_min_ed)
+evolve.cpp:                          /(n_freeze_surf - 1 + 1e-15));
+evolve.cpp:                          << "can not open freeze-out list file: "
+evolve.cpp:                      << " freeze-out surface will be generated ...";
+freeze.cpp:// MUSIC - a 3+1D viscous relativistic hydrodynamic code for heavy ion collisions
+freeze.cpp:// Copyright (C) 2017  Gabriel Denicol, Charles Gale, Sangyong Jeon, Matthew Luzum, Jean-François Paquet, Björn Schenke, Chun Shen
+freeze.cpp:    if (etasize < DATA_in->pseudo_steps + 1) {
+freeze.cpp:    surface_in_binary = DATA_ptr->freeze_surface_in_binary;
+freeze.cpp:    int temp_list [] = {211, -211, 321, -321, 2212, -2212, 3222, -3222,
+freeze.cpp:                        3112, -3112, 3312, -3312};
+freeze.cpp:    particleMax = DATA_ptr->NumberOfParticlesToInclude;
+freeze.cpp:    if (DATA_ptr->turn_on_diff == 1 && DATA_ptr->include_deltaf_qmu == 1) {
+freeze.cpp:        if (DATA_ptr->deltaf_14moments == 1) {
+freeze.cpp:        } else if (DATA_ptr->include_deltaf_qmu == 1) {
+freeze.cpp:    boost_invariant = DATA_ptr->boost_invariant;
+freeze.cpp:        // from -infty to +infty
+freeze.cpp:            2.4014964e-02, 1.2545322e-01, 3.0358683e-01,
+freeze.cpp:            5.5116454e-01, 8.5805566e-01, 1.2116973e+00,
+freeze.cpp:            1.2301297e-01, 2.8146419e-01, 4.2863688e-01,
+freeze.cpp:            5.5828271e-01, 6.6507682e-01, 7.4464400e-01,
+freeze.cpp:            7.9372594e-01, 8.1031297e-01, 7.9372594e-01,
+freeze.cpp:            7.4464400e-01, 6.6507682e-01, 5.5828271e-01,
+freeze.cpp:            4.2863688e-01, 2.8146419e-01, 1.2301297e-01,
+freeze.cpp:    double ef = DATA->epsilonFreeze;
+freeze.cpp:    if (DATA->whichEOS == 3) {
+freeze.cpp:        mu_name = envPath + "/EOS/s95p-PCE-v1/s95p-PCE-v1_pichem1.dat";
+freeze.cpp:    } else if (DATA->whichEOS == 4) {
+freeze.cpp:        mu_name = envPath + "/EOS/s95p-PCE155/pichem1.dat";
+freeze.cpp:    } else if (DATA->whichEOS == 5) {
+freeze.cpp:        mu_name = envPath + "/EOS/s95p-PCE160/pichem1.dat";
+freeze.cpp:    } else if (DATA->whichEOS == 6) {
+freeze.cpp:        mu_name = envPath + "/EOS/s95p-PCE165-v0/s95p-PCE165-v0_pichem1.dat";
+freeze.cpp:    for (int j = NEPP1-1; j >= 0; j--) {
+freeze.cpp:        ie1 = floor((ef-EPP1)/deltaEPP1);
+freeze.cpp:        ie2 = floor((ef-EPP1)/deltaEPP1+1);
+freeze.cpp:        frace = (ef-(ie1*deltaEPP1+EPP1))/deltaEPP1;
+freeze.cpp:        pa = chemPot[i-1][ie1];
+freeze.cpp:        pb = chemPot[i-1][ie2];
+freeze.cpp:            mu[i] = pa*(1-frace) + pb*frace;
+freeze.cpp:    for (int i = 0; i < DATA->NumberOfParticlesToInclude; i++) {
+freeze.cpp:    if (DATA->NumberOfParticlesToInclude >= 8) {
+freeze.cpp:    if (DATA->whichEOS != 6) {
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude >= 12)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude >= 17)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=18)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=19)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=20)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=21)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=26)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=27)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=28)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=30)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=31)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=32)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=33)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=34)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=35)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=60)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=61)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=62)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=63)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=110)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=111)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=117)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=118)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=119)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=120)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=170)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=171)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=17)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=18)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=19)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=20)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=21)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=26)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=27)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=28)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=30)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=31)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=32)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=33)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=34)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=35)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=60)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=61)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=62)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=63)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=170)
+freeze.cpp:        if (DATA->NumberOfParticlesToInclude>=171)
+freeze.cpp:    for(int i = 1; i < DATA->NumberOfParticlesToInclude; i++) {
+freeze.cpp:            if (particleList[i].baryon == -1) {
+freeze.cpp:                k -= particleList[i].decays;
+freeze.cpp:                    if (particleList[i].baryon == -1
+freeze.cpp:                            *particleList[partid[MHALF-decay[k].part[m]]].muAtFreezeOut);
+freeze.cpp:                if (particleList[i].baryon > -1)
+freeze.cpp:    music_message << "Got the chemical potentials at freeze-out for the resonances.";
+freeze.cpp:    if (DATA->whichEOS == 7 || DATA->whichEOS == 10) {
+freeze.cpp:        p_name = envPath + "/EOS/pdg-urqmd_v3.3+.dat";
+freeze.cpp:        partid[k] = -1;
+freeze.cpp:    if (DATA->echo_level > 5) {
+freeze.cpp:                    (DATA->NumberOfParticlesToInclude + 2)*sizeof(Particle));
+freeze.cpp:    if (DATA->echo_level > 5) {
+freeze.cpp:    while (i < DATA->NumberOfParticlesToInclude) {
+freeze.cpp:        // include anti-baryons (there are none in the file)
+freeze.cpp:            particleList[i].width   =  particleList[i-1].width;
+freeze.cpp:            particleList[i].charm   = -particleList[i-1].charm;
+freeze.cpp:            particleList[i].bottom  = -particleList[i-1].bottom;
+freeze.cpp:            particleList[i].isospin =  particleList[i-1].isospin;
+freeze.cpp:            particleList[i].charge  = -particleList[i-1].charge;
+freeze.cpp:            particleList[i].decays  =  particleList[i-1].decays;
+freeze.cpp:            particleList[i].stable  =  particleList[i-1].stable;
+freeze.cpp:            particleList[i].number  = -particleList[i-1].number;
+freeze.cpp:            strcpy(particleList[i].name, "Anti-");
+freeze.cpp:            strcat(particleList[i].name,particleList[i-1].name);
+freeze.cpp:            particleList[i].mass       =  particleList[i-1].mass;
+freeze.cpp:            particleList[i].degeneracy =  particleList[i-1].degeneracy;
+freeze.cpp:            particleList[i].baryon     = -particleList[i-1].baryon;
+freeze.cpp:            particleList[i].strange    = -particleList[i-1].strange;
+freeze.cpp:            particleList[i].charge     = -particleList[i-1].charge;
+freeze.cpp:    DATA->NumberOfParticlesToInclude = i;
+freeze.cpp:    // here read the stable particles' chemical potential at freeze-out
+freeze.cpp:    if (DATA->whichEOS > 2 && DATA->whichEOS < 6) {
+freeze.cpp:    music_message.info("reading freeze-out surface");
+freeze.cpp:            // freeze-out Wmunu
+freeze.cpp:            if (DATA->turn_on_bulk) {
+freeze.cpp:            if (DATA->turn_on_rhob) {
+freeze.cpp:            if (DATA->turn_on_diff) {
+freeze_pseudo.cpp:// MUSIC - a 3+1D viscous relativistic hydrodynamic code for heavy ion collisions
+freeze_pseudo.cpp:// Copyright (C) 2017  Gabriel Denicol, Charles Gale, Sangyong Jeon, Matthew Luzum, Jean-François Paquet, Björn Schenke, Chun Shen
+freeze_pseudo.cpp:                      << DATA->NumberOfParticlesToInclude;
+freeze_pseudo.cpp:        if (count >= DATA->NumberOfParticlesToInclude) {
+freeze_pseudo.cpp:        pseudo_steps = ietamax - 1;
+freeze_pseudo.cpp:                ptmin + (ptmax - ptmin)*pow(static_cast<double>(ipt), 2.)
+freeze_pseudo.cpp:                        /pow(static_cast<double>(iptmax - 1), 2.));
+freeze_pseudo.cpp:            particleList[ip].y[ieta] = ieta*deltaeta - etamax;
+freeze_pseudo.cpp:    double etamax = DATA->max_pseudorapidity;
+freeze_pseudo.cpp:    int ietamax = DATA->pseudo_steps + 1;  // pseudo_steps is number of steps.
+freeze_pseudo.cpp:        deltaeta = 2.*etamax/DATA->pseudo_steps;
+freeze_pseudo.cpp:    double ptmax = DATA->max_pt;
+freeze_pseudo.cpp:    double ptmin = DATA->min_pt;
+freeze_pseudo.cpp:    int iptmax = DATA->pt_steps+1;  // Number of points is iptmax + 1
+freeze_pseudo.cpp:    int iphimax = DATA->phi_steps;  // number of points
+freeze_pseudo.cpp:    particleList[j].ny = DATA->pseudo_steps + 1;
+freeze_pseudo.cpp:        sign = -1.;
+freeze_pseudo.cpp:    // -----------------------------------------------------------------------
+freeze_pseudo.cpp:            number,  etamax, DATA->pseudo_steps+1, ptmin, ptmax,
+freeze_pseudo.cpp:        double pt =  (ptmin + (ptmax - ptmin)
+freeze_pseudo.cpp:                               /pow(static_cast<double>(iptmax - 1), 2.));
+freeze_pseudo.cpp:    if (DATA_ptr->turn_on_bulk == 1 && DATA_ptr->include_deltaf_bulk == 1) {
+freeze_pseudo.cpp:        double eta = -etamax + ieta*deltaeta;
+freeze_pseudo.cpp:        particleList[j].y[ieta] = eta;  // store particle pseudo-rapidity
+freeze_pseudo.cpp:            if (DATA->pseudofreeze == 1) {
+freeze_pseudo.cpp:                if (DATA->whichEOS>=3 && DATA->whichEOS < 10) {
+freeze_pseudo.cpp:                    // at the freeze-out energy density
+freeze_pseudo.cpp:                if (DATA->turn_on_shear == 1 && DATA->include_deltaf == 1) {
+freeze_pseudo.cpp:                if (DATA->turn_on_bulk == 1 && DATA->include_deltaf_bulk == 1) {
+freeze_pseudo.cpp:                if (DATA->turn_on_diff == 1 && DATA->include_deltaf_qmu == 1) {
+freeze_pseudo.cpp:                    if (DATA->deltaf_14moments == 0) {
+freeze_pseudo.cpp:                if (DATA->turn_on_rhob == 1) {
+freeze_pseudo.cpp:                    if (fabs(y - eta_s) < y_minus_eta_cut) {
+freeze_pseudo.cpp:                                          - sinh_y_local*sinh_eta_s);
+freeze_pseudo.cpp:                                          - cosh_y_local*sinh_eta_s);
+freeze_pseudo.cpp:                            double E = (ptau*u_flow[0] - px*u_flow[1]
+freeze_pseudo.cpp:                                        - py*u_flow[2] - peta*u_flow[3]);
+freeze_pseudo.cpp:                            double f = 1./(exp(1./T*(E - mu)) + sign);
+freeze_pseudo.cpp:                                Wfactor = (ptau*W00*ptau - 2.*ptau*W01*px
+freeze_pseudo.cpp:                                           - 2.*ptau*W02*py
+freeze_pseudo.cpp:                                           - 2.*ptau*W03*peta
+freeze_pseudo.cpp:                                delta_f_shear = (f*(1. - sign*f)
+freeze_pseudo.cpp:                                if (DATA->include_deltaf==2) {
+freeze_pseudo.cpp:                                    // to p^(2-alpha):
+freeze_pseudo.cpp:                                                     *120./(tgamma(6.-alpha)));
+freeze_pseudo.cpp:                                        - f*(1. - sign*f)*Pi_bulk
+freeze_pseudo.cpp:                                        - f*(1. - sign*f)/E_over_T
+freeze_pseudo.cpp:                                          - bulk_deltaf_coeffs[1]
+freeze_pseudo.cpp:                                        - f*(1. - sign*f)
+freeze_pseudo.cpp:                                        *(-bulk_deltaf_coeffs[0]
+freeze_pseudo.cpp:                                        - f*(1.-sign*f)/sqrt(E_over_T)
+freeze_pseudo.cpp:                                            *(- bulk_deltaf_coeffs[0]
+freeze_pseudo.cpp:                                        - f*(1.-sign*f)
+freeze_pseudo.cpp:                                              - bulk_deltaf_coeffs[1]/E_over_T)
+freeze_pseudo.cpp:                                qmufactor = (ptau*qmu_0 - px*qmu_1 - py*qmu_2
+freeze_pseudo.cpp:                                             - peta*qmu_3);
+freeze_pseudo.cpp:                                if (DATA->deltaf_14moments == 0) {
+freeze_pseudo.cpp:                                        f*(1. - sign*f)
+freeze_pseudo.cpp:                                         *(prefactor_qmu - baryon/E)*qmufactor
+freeze_pseudo.cpp:                                        f*(1. - sign*f)
+freeze_pseudo.cpp:                double sum = temp_sum[ipt][iphi]*prefactor;   // in GeV^(-2)
+freeze_pseudo.cpp:    if (DATA_ptr->turn_on_bulk == 1 && DATA_ptr->include_deltaf_bulk == 1) {
+freeze_pseudo.cpp:    // boost-invarianat hyper-surface from hydro simulations
+freeze_pseudo.cpp:    double etamax = DATA->max_pseudorapidity;
+freeze_pseudo.cpp:    int ietamax = DATA->pseudo_steps + 1;  // pseudo_steps is number of steps.
+freeze_pseudo.cpp:        deltaeta = 2.*etamax/DATA->pseudo_steps;
+freeze_pseudo.cpp:    double ptmax = DATA->max_pt;
+freeze_pseudo.cpp:    double ptmin = DATA->min_pt;
+freeze_pseudo.cpp:    int iptmax = DATA->pt_steps+1;  // Number of points is iptmax + 1
+freeze_pseudo.cpp:    int iphimax = DATA->phi_steps;  // number of points
+freeze_pseudo.cpp:    particleList[j].ny = DATA->pseudo_steps + 1;
+freeze_pseudo.cpp:        sign = -1.;
+freeze_pseudo.cpp:    // -----------------------------------------------------------------------
+freeze_pseudo.cpp:            number,  etamax, DATA->pseudo_steps+1, ptmin, ptmax,
+freeze_pseudo.cpp:        double pt =  (ptmin + (ptmax - ptmin)
+freeze_pseudo.cpp:                              /pow(static_cast<double>(iptmax - 1), 2.));
+freeze_pseudo.cpp:    if (DATA_ptr->turn_on_bulk == 1 && DATA_ptr->include_deltaf_bulk == 1) {
+freeze_pseudo.cpp:            if (DATA->whichEOS>=3 && DATA->whichEOS < 10) {
+freeze_pseudo.cpp:                // at the freeze-out energy density
+freeze_pseudo.cpp:            if (DATA->turn_on_shear == 1 && DATA->include_deltaf == 1) {
+freeze_pseudo.cpp:            if (DATA->turn_on_bulk == 1 && DATA->include_deltaf_bulk == 1) {
+freeze_pseudo.cpp:                    // sinh(y - eta_s) = - sinh(eta_s)
+freeze_pseudo.cpp:                    double peta = - mt*sinh_eta_s;
+freeze_pseudo.cpp:                        double E = (ptau*u_flow[0] - px*u_flow[1]
+freeze_pseudo.cpp:                                    - py*u_flow[2]- peta*u_flow[3]);
+freeze_pseudo.cpp:                        double f = 1./(exp(1./T*(E - mu)) + sign);
+freeze_pseudo.cpp:                            Wfactor = (ptau*W00*ptau - 2.*ptau*W01*px
+freeze_pseudo.cpp:                                       - 2.*ptau*W02*py
+freeze_pseudo.cpp:                                       - 2.*ptau*W03*peta
+freeze_pseudo.cpp:                            delta_f_shear = (f*(1. - sign*f)
+freeze_pseudo.cpp:                            if (DATA->include_deltaf==2) {
+freeze_pseudo.cpp:                                // to p^(2-alpha):
+freeze_pseudo.cpp:                                                 *120./(tgamma(6.-alpha)));
+freeze_pseudo.cpp:                                    - f*(1. - sign*f)*Pi_bulk
+freeze_pseudo.cpp:                                    - f*(1. - sign*f)/E_over_T
+freeze_pseudo.cpp:                                      - bulk_deltaf_coeffs[1]
+freeze_pseudo.cpp:                                    - f*(1. - sign*f)
+freeze_pseudo.cpp:                                    *(-bulk_deltaf_coeffs[0]
+freeze_pseudo.cpp:                                    - f*(1.-sign*f)/sqrt(E_over_T)
+freeze_pseudo.cpp:                                        *(- bulk_deltaf_coeffs[0]
+freeze_pseudo.cpp:                                    - f*(1.-sign*f)
+freeze_pseudo.cpp:                                          - bulk_deltaf_coeffs[1]/E_over_T)
+freeze_pseudo.cpp:        double eta = -etamax + ieta*deltaeta;
+freeze_pseudo.cpp:        particleList[j].y[ieta] = eta;  // store particle pseudo-rapidity
+freeze_pseudo.cpp:    if (DATA_ptr->turn_on_bulk == 1 && DATA_ptr->include_deltaf_bulk == 1) {
+freeze_pseudo.cpp:            number,  DATA->max_pseudorapidity, DATA->pseudo_steps+1,
+freeze_pseudo.cpp:            DATA->min_pt, DATA->max_pt, DATA->pt_steps+1, DATA->phi_steps);
+freeze_pseudo.cpp:    for (int iy = 0; iy <= DATA->pseudo_steps; iy++) {
+freeze_pseudo.cpp:        for (int ipt = 0; ipt <= DATA->pt_steps; ipt++) {
+freeze_pseudo.cpp:            for (int iphi = 0; iphi < DATA->phi_steps; iphi++) {
+freeze_pseudo.cpp://    double mass_tol = 1e-1; //tolerance on relative mass
+freeze_pseudo.cpp:    double mass_tol = DATA->MassTolerance;
+freeze_pseudo.cpp://    double mu_tol = 1e-1;
+freeze_pseudo.cpp:    double mu_tol = DATA->MuTolerance;
+freeze_pseudo.cpp:                                        - particleList[part].mass)/particleList[i].mass;
+freeze_pseudo.cpp:                                      - particleList[part].muAtFreezeOut)/particleList[i].muAtFreezeOut;
+freeze_pseudo.cpp:                    && (DATA->turn_on_rhob == 0
+freeze_pseudo.cpp:                    int iphimax = DATA->phi_steps;
+freeze_pseudo.cpp:                    int iptmax = DATA->pt_steps + 1;
+freeze_pseudo.cpp:                    int ietamax = DATA->pseudo_steps + 1;
+freeze_pseudo.cpp:                    double ptmax = DATA->max_pt;
+freeze_pseudo.cpp:                    double ptmin = DATA->min_pt;
+freeze_pseudo.cpp:                    double etamax = DATA->max_pseudorapidity;
+freeze_pseudo.cpp:        int pid_list [] = {211, -211, 321, -321, 2212, -2212};
+freeze_pseudo.cpp:    // take tabulated post-decay spectra and
+freeze_pseudo.cpp:    if (DATA->NumberOfParticlesToInclude > 200) {
+freeze_pseudo.cpp:        if ((DATA-> whichEOS != 7 && particleMax < 320)
+freeze_pseudo.cpp:                || ((DATA->whichEOS == 7) && particleMax < 327)) {
+freeze_pseudo.cpp:        Output_charged_hadrons_pT_differential_spectra(DATA, 1, -2.5, 2.5);
+freeze_pseudo.cpp:        Output_charged_IntegratedFlow(DATA, 0.3, 3.0, -2.5, 2.5);
+freeze_pseudo.cpp:        Output_charged_hadrons_pT_differential_spectra(DATA, 1, -2.5, 2.5);
+freeze_pseudo.cpp:        //Output_charged_IntegratedFlow(DATA, 0.5, 5.0, -2.5, 2.5);
+freeze_pseudo.cpp:        Output_charged_IntegratedFlow(DATA, 0.5, 3.0, -2.5, 2.5);
+freeze_pseudo.cpp:        Output_charged_hadrons_pT_differential_spectra(DATA, 1, -0.8, 0.8);
+freeze_pseudo.cpp:        Output_charged_IntegratedFlow(DATA, 0.2, 3.0, -0.8, 0.8);
+freeze_pseudo.cpp:        //Output_charged_IntegratedFlow(DATA, 0.3, 3.0, -2.5, 2.5);
+freeze_pseudo.cpp:        //Output_charged_IntegratedFlow(DATA, 0.3, 3.0, -2.5, 2.5);
+freeze_pseudo.cpp:        //Output_charged_IntegratedFlow(DATA, 0.3, 3.0, -2.5, 2.5);
+freeze_pseudo.cpp:        //Output_charged_IntegratedFlow(DATA, 0.3, 3.0, -2.5, 2.5);
+freeze_pseudo.cpp:        //Output_charged_IntegratedFlow(DATA, 0.3, 3.0, -2.5, 2.5);
+freeze_pseudo.cpp:        int pid_list [] = {211, -211, 321, -321, 2212, -2212};
+freeze_pseudo.cpp:    // this is a shell function for Cooper-Frye routine
+freeze_pseudo.cpp:    // -- spectra calculated on an equally-spaced grid
+freeze_pseudo.cpp:    ReadParticleData(DATA, eos); // read in data for Cooper-Frye
+freeze_pseudo.cpp://outfile4<<" " << abs(-W22/W02) << " " << arg(-W22/W02) <<endl;
+freeze_pseudo.cpp:  //  if(DATA->NumberOfParticlesToInclude > 2){
+freeze_pseudo.cpp://double eta_minF = -2.5;
+freeze_pseudo.cpp:        eta *= -1.;
+freeze_pseudo.cpp:// calculates eta= or y-integrated flow versus rapidity.
+freeze_pseudo.cpp:        if (DATA->pseudofreeze == 1)
+freeze_pseudo.cpp:        if (DATA->pseudofreeze == 1)
+freeze_pseudo.cpp:        if (DATA->pseudofreeze == 1)
+freeze_pseudo.cpp:            testmax = Rap(particleList[j].y[neta-1], particleList[j].pt[0], m);
+freeze_pseudo.cpp:            testmax = particleList[j].y[neta-1];
+freeze_pseudo.cpp:        if (DATA->pseudofreeze == 1)
+freeze_pseudo.cpp:            testmax = particleList[j].y[neta-1];
+freeze_pseudo.cpp:            testmax = Rap(particleList[j].y[neta-1], particleList[j].pt[0], m);
+freeze_pseudo.cpp:                if (DATA->pseudofreeze == 1) {
+freeze_pseudo.cpp:                     // get Pseudo-rapidity
+freeze_pseudo.cpp:                     etalist[ieta] = eta_local;   // get Pseudo-rapidity
+freeze_pseudo.cpp:                // pseudo-rapidity
+freeze_pseudo.cpp:// calculates pt- and (pseudo)rapidity-integrated flow for a given range
+freeze_pseudo.cpp:    if (maxpt > particleList[j].pt[npt-1]) {
+freeze_pseudo.cpp:             << maxpt << " > maximum " << particleList[j].pt[npt-1]
+freeze_pseudo.cpp:    // do rapidity-integral first
+freeze_pseudo.cpp:        if (fabs(minpt - maxpt) > 1e-6) {
+freeze_pseudo.cpp:    fname += "vnpt_y-";
+freeze_pseudo.cpp:    fname2 += "vnpt_eta-";
+freeze_pseudo.cpp:                                        eta, eta, vn);  // pseudo-rapidity
+freeze_pseudo.cpp:    double y_min = DATA->dNdyptdpt_y_min;
+freeze_pseudo.cpp:    double y_max = DATA->dNdyptdpt_y_max;
+freeze_pseudo.cpp:    double eta_min = DATA->dNdyptdpt_eta_min;
+freeze_pseudo.cpp:    double eta_max = DATA->dNdyptdpt_eta_max;
+freeze_pseudo.cpp:        fname << "./outputs/Fvnpt-" << number << "_y_"
+freeze_pseudo.cpp:        fname << "./outputs/vnpt-" << number << "_y_"
+freeze_pseudo.cpp:        fname2 << "./outputs/Fvnpt-" << number << "_eta_"
+freeze_pseudo.cpp:        fname2 << "./outputs/vnpt-" << number << "_eta_"
+freeze_pseudo.cpp:               << "v7cos  v7sin    v1    v2    v3    v4    v5    v6    v7" << endl;  // in pseudo-rapidity
+freeze_pseudo.cpp:        outfilevn << "  " << vn[0][0]/pt/(y_max - y_min)/(2*M_PI);
+freeze_pseudo.cpp:        // pseudo-rapidity
+freeze_pseudo.cpp:        outfilevn2 << "  " << vn[0][0]/pt/(eta_max - eta_min)/(2*M_PI);
+freeze_pseudo.cpp:       fname << "./outputs/Fvn_y-"
+freeze_pseudo.cpp:       fname << "./outputs/vn_y-"
+freeze_pseudo.cpp:       fname2 << "./outputs/Fvn_eta-"
+freeze_pseudo.cpp:       fname2 << "./outputs/vn_eta-"
+freeze_pseudo.cpp:    double y_min = DATA->dNdy_y_min;
+freeze_pseudo.cpp:    double y_max = DATA->dNdy_y_max;
+freeze_pseudo.cpp:    double eta_min = DATA->dNdy_eta_min;
+freeze_pseudo.cpp:    double eta_max = DATA->dNdy_eta_max;
+freeze_pseudo.cpp:    int nrap = DATA->dNdy_nrap;
+freeze_pseudo.cpp:    double dy = (y_max - y_min)/(nrap - 1);
+freeze_pseudo.cpp:    double deta = (eta_max - eta_min)/(nrap - 1);
+freeze_pseudo.cpp:        // pseudo-rapidity
+freeze_pseudo.cpp:    double shear = DATA -> shear_to_s;
+freeze_pseudo.cpp:    double exc2 = DATA -> exc2;
+freeze_pseudo.cpp:    double exc3 = DATA -> exc3;
+freeze_pseudo.cpp:    double exc4 = DATA -> exc4;
+freeze_pseudo.cpp:    double exc5 = DATA -> exc5;
+freeze_pseudo.cpp:    double eta_min = DATA->dNdy_eta_min;
+freeze_pseudo.cpp:    double eta_max = DATA->dNdy_eta_max;
+freeze_pseudo.cpp:    int nrap = DATA->dNdy_nrap;
+freeze_pseudo.cpp:    double deta = (eta_max - eta_min)/(nrap - 1);
+freeze_pseudo.cpp:    double pT_max = particleList[1].pt[particleList[1].npt-1];
+freeze_pseudo.cpp:    double dpT = (pT_max - pT_min)/(npT - 1);
+freeze_pseudo.cpp:    if (n > nharmonics - 1) {
+freeze_pseudo.cpp:    if (maxpt > particleList[j].pt[npt-1]) {
+freeze_pseudo.cpp:             << maxpt << " > maximum " << particleList[j].pt[npt-1];
+freeze_pseudo.cpp:    if (n > nharmonics-1) {
+freeze_pseudo.cpp:    if (n > nharmonics - 1) {
+freeze_pseudo.cpp:    if (n > nharmonics - 1) {
+freeze_pseudo.cpp:// Calculates v1 and psi_1 with pt-dependent weight (pt - <pt^2>/<pt>)
+freeze_pseudo.cpp:    if (maxpt > particleList[j].pt[npt-1]) {
+freeze_pseudo.cpp:             << maxpt << " > maximum " << particleList[j].pt[npt-1];
+freeze_pseudo.cpp:    // next calculate integrated v1 and psi1 with weight pt - <pt^2>/<pt>
+freeze_pseudo.cpp:        double weight = (pt - meanpt2/meanpt)*dndpt[ipt];
+freeze_pseudo.cpp:    int idx_T = static_cast<int>((T - delta_qmu_coeff_table_T0)
+freeze_pseudo.cpp:    int idx_mu = static_cast<int>((muB - delta_qmu_coeff_table_mu0)
+freeze_pseudo.cpp:    double x_fraction = ((T - delta_qmu_coeff_table_T0)
+freeze_pseudo.cpp:                         /delta_qmu_coeff_table_dT - idx_T);
+freeze_pseudo.cpp:    double y_fraction = ((muB - delta_qmu_coeff_table_mu0)
+freeze_pseudo.cpp:                         /delta_qmu_coeff_table_dmu - idx_mu);
+freeze_pseudo.cpp:    if (idx_mu > deltaf_qmu_coeff_table_length_mu - 2) {
+freeze_pseudo.cpp:    if (idx_T > deltaf_qmu_coeff_table_length_T - 2) {
+freeze_pseudo.cpp:    double coeff = f1*(1. - x_fraction)*(1. - y_fraction)
+freeze_pseudo.cpp:                   + f2*(1. - x_fraction)*y_fraction
+freeze_pseudo.cpp:                   + f4*x_fraction*(1. - y_fraction);
+freeze_pseudo.cpp:    int idx_T = static_cast<int>((T - delta_coeff_table_14mom_T0)
+freeze_pseudo.cpp:    int idx_mu = static_cast<int>((muB - delta_coeff_table_14mom_mu0)
+freeze_pseudo.cpp:    double x_fraction = ((T - delta_coeff_table_14mom_T0)
+freeze_pseudo.cpp:                         /delta_coeff_table_14mom_dT - idx_T);
+freeze_pseudo.cpp:    double y_fraction = ((muB - delta_coeff_table_14mom_mu0)
+freeze_pseudo.cpp:                         /delta_coeff_table_14mom_dmu - idx_mu);
+freeze_pseudo.cpp:       exit(-1);
+freeze_pseudo.cpp:    double coeff = f1*(1. - x_fraction)*(1. - y_fraction)
+freeze_pseudo.cpp:                   + f2*(1. - x_fraction)*y_fraction
+freeze_pseudo.cpp:                   + f4*x_fraction*(1. - y_fraction);
+freeze_pseudo.cpp:        Tdec_fm_power[ipower] = Tdec_fm_power[ipower-1]*Tdec_fm;
+freeze_pseudo.cpp:                exp(-15.04512474*Tdec_fm + 11.76194266)/pow(hbarc, 3));
+freeze_pseudo.cpp:                exp( -12.45699277*Tdec_fm + 11.4949293)/hbarc/hbarc);
+freeze_pseudo.cpp:                -exp(-14.45087586*Tdec_fm + 11.62716548)/pow(hbarc, 3));
+freeze_pseudo.cpp:        // A Polynomial fit to each coefficient -- temperature in fm^-1
+freeze_pseudo.cpp:        // Both fits are reliable between T=100 -- 180 MeV
+freeze_pseudo.cpp:                                  - 8163329.49562861*Tdec_fm_power[1]
+freeze_pseudo.cpp:                                  - 162590040.002683*Tdec_fm_power[3]
+freeze_pseudo.cpp:                                  - 578181331.809836*Tdec_fm_power[5]
+freeze_pseudo.cpp:                                  - 470493661.096657*Tdec_fm_power[7]
+freeze_pseudo.cpp:                                  - 67175218.4629078*Tdec_fm_power[9]
+freeze_pseudo.cpp:                                  - 17.6740645873717*Tdec_fm_power[1]
+freeze_pseudo.cpp:                                  - 635.999435106846*Tdec_fm_power[3]
+freeze_pseudo.cpp:                                  - 3836.32258307711*Tdec_fm_power[5]
+freeze_pseudo.cpp:                                  - 4566.22991441914*Tdec_fm_power[7]
+freeze_pseudo.cpp:                                  - 853.908199724349*Tdec_fm_power[9]
+freeze_pseudo.cpp:        // A Polynomial fit to each coefficient -- temperature in fm^-1
+freeze_pseudo.cpp:        // Both fits are reliable between T=100 -- 180 MeV
+freeze_pseudo.cpp:                21091365.1182649 - 290482229.281782*Tdec_fm_power[1]
+freeze_pseudo.cpp:              - 6608608560.99887*Tdec_fm_power[3]
+freeze_pseudo.cpp:              - 26194517161.8205*Tdec_fm_power[5]
+freeze_pseudo.cpp:              - 23375101221.2855*Tdec_fm_power[7]
+freeze_pseudo.cpp:              - 3618358144.18576*Tdec_fm_power[9]
+freeze_pseudo.cpp:                4007863.29316896 - 55199395.3534188*Tdec_fm_power[1]
+freeze_pseudo.cpp:              - 1255681487.77798*Tdec_fm_power[3]
+freeze_pseudo.cpp:              - 4976331606.85766*Tdec_fm_power[5]
+freeze_pseudo.cpp:              - 4439937810.57449*Tdec_fm_power[7]
+freeze_pseudo.cpp:              - 687164038.128814*Tdec_fm_power[9]
+freeze_pseudo.cpp:                160421664.93603 - 2212807124.97991*Tdec_fm_power[1]
+freeze_pseudo.cpp:              - 50204536518.1767*Tdec_fm_power[3]
+freeze_pseudo.cpp:              - 197298426823.223*Tdec_fm_power[5]
+freeze_pseudo.cpp:              - 173790947240.829*Tdec_fm_power[7]
+freeze_pseudo.cpp:              - 26461154892.6963*Tdec_fm_power[9]
+freeze_pseudo.cpp:                33369186.2536556 - 460293490.420478*Tdec_fm_power[1]
+freeze_pseudo.cpp:              - 10443297927.601*Tdec_fm_power[3]
+freeze_pseudo.cpp:              - 41040777943.4963*Tdec_fm_power[5]
+freeze_pseudo.cpp:              - 36150531001.3718*Tdec_fm_power[7]
+freeze_pseudo.cpp:              - 5504165325.05431*Tdec_fm_power[9]
+freeze_pseudo.cpp:                1167272041.90731 - 16378866444.6842*Tdec_fm_power[1]
+freeze_pseudo.cpp:              - 382670727905.111*Tdec_fm_power[3]
+freeze_pseudo.cpp:              - 1540948583116.54*Tdec_fm_power[5]
+freeze_pseudo.cpp:              - 1385606389545*Tdec_fm_power[7]
+freeze_pseudo.cpp:              - 214726945096.326*Tdec_fm_power[9]
+freeze_pseudo.cpp:                5103633637.7213 - 71612903872.8163*Tdec_fm_power[1]
+freeze_pseudo.cpp:              - 1673143669281.46*Tdec_fm_power[3]
+freeze_pseudo.cpp:              - 6737468792456.4*Tdec_fm_power[5]
+freeze_pseudo.cpp:              - 6058276038129.83*Tdec_fm_power[7]
+freeze_pseudo.cpp:              - 938850005883.612*Tdec_fm_power[9]
+grid_info.cpp:// Copyright Chun Shen @ 2014-2016
+grid_info.cpp:                    - (DATA.eta_size)/2.0);
+grid_info.cpp:    int itau = static_cast<int>((tau - DATA.tau0)/DATA.delta_tau);
+grid_info.cpp:                // only ouput fluid cells that are above cut-off temperature
+grid_info.cpp:        double eta_local = - DATA.eta_size/2. + ieta*deta;
+grid_info.cpp:                // only ouput fluid cells that are above cut-off temperature
+grid_info.cpp:                //if (T_local*hbarc < DATA->output_evolution_T_cut) continue;
+grid_info.cpp:                // only ouput fluid cells that are above cut-off temperature
+grid_info.cpp:                //if (DATA->turn_on_shear == 1) {
+grid_info.cpp:                //if (DATA->turn_on_bulk == 1) {
+grid_info.cpp:                //if (DATA->turn_on_diff == 1) {
+grid_info.cpp:        const double eta_s = deta*ieta - (DATA.eta_size)/2.0;
+grid_info.cpp:                                  *(-1.0 + c_prev.u[0]*c_prev.u[0]));
+grid_info.cpp:        const double T00_local = (e_local + pressure)*u0*u0 - pressure;
+grid_info.cpp:            T_diff += fabs(T_analytic[i] - T_local);
+grid_info.cpp:            ux_diff += fabs(ux_analytic[i] - arena(i,i,0).u[1]);
+grid_info.cpp:            uy_diff += fabs(uy_analytic[i] - arena(i,i,0).u[2]);
+grid_info.cpp:                               - arena(i,i,0).Wmunu[4]*unit_convert));
+grid_info.cpp:                               - arena(i,i,0).Wmunu[5]*unit_convert));
+grid_info.cpp:                               - arena(i,i,0).Wmunu[7]*unit_convert));
+grid_info.cpp:                               - arena(i,i,0).Wmunu[9]*unit_convert));
+grid_info.cpp:    double x_min = -DATA.x_size/2.;
+grid_info.cpp:    double y_min = -DATA.y_size/2.;
+grid_info.cpp:    double eta_min = -6.94;
+grid_info.cpp:        double eta_local = - DATA.eta_size/2. + ieta*deta;
+grid_info.cpp:            double y_local = - DATA.y_size/2. + iy*dy;
+grid_info.cpp:                double x_local = - DATA.x_size/2. + ix*dx;
+grid_info.cpp:                double T00_ideal = (e_local + pressure)*u0*u0 - pressure;
+grid_info.cpp:                double Pi00      = arena(ix, iy, ieta).pi_b*(-1.0 + u0*u0);
+grid_info.cpp:       muB = -muB;
+grid_info.cpp:                    (T - delta_qmu_coeff_table_T0)/delta_qmu_coeff_table_dT);
+grid_info.cpp:                (muB - delta_qmu_coeff_table_mu0)/delta_qmu_coeff_table_dmu);
+grid_info.cpp:    if (idx_T > deltaf_qmu_coeff_table_length_T - 2 || idx_T < 0)
+grid_info.cpp:    if (idx_mu > deltaf_qmu_coeff_table_length_mu - 2)
+grid_info.cpp:    double x_fraction = ((T - delta_qmu_coeff_table_T0)
+grid_info.cpp:                         /delta_qmu_coeff_table_dT - idx_T);
+grid_info.cpp:    double y_fraction = ((muB - delta_qmu_coeff_table_mu0)
+grid_info.cpp:                         /delta_qmu_coeff_table_dmu - idx_mu);
+grid_info.cpp:    double coeff = (f1*(1. - x_fraction)*(1. - y_fraction)
+grid_info.cpp:                    + f2*(1. - x_fraction)*y_fraction
+grid_info.cpp:                    + f4*x_fraction*(1. - y_fraction));
+grid_info.cpp:                (T - delta_coeff_table_14mom_T0)/delta_coeff_table_14mom_dT);
+grid_info.cpp:            (muB - delta_coeff_table_14mom_mu0)/delta_coeff_table_14mom_dmu);
+grid_info.cpp:        (T - delta_coeff_table_14mom_T0)/delta_coeff_table_14mom_dT - idx_T);
+grid_info.cpp:    double y_fraction = ((muB - delta_coeff_table_14mom_mu0)
+grid_info.cpp:                         /delta_coeff_table_14mom_dmu - idx_mu);
+grid_info.cpp:       exit(-1);
+grid_info.cpp:    double coeff = (f1*(1. - x_fraction)*(1. - y_fraction)
+grid_info.cpp:                    + f2*(1. - x_fraction)*y_fraction
+grid_info.cpp:                    + f4*x_fraction*(1. - y_fraction));
+grid_info.cpp://! within a given space-time rapidity range
+grid_info.cpp:    if (fabs(tau - DATA.tau0) < 1e-10) {
+grid_info.cpp:                    - (DATA.eta_size)/2.0);
+grid_info.cpp:    avg_T  = avg_T/(weight + 1e-15)*hbarc;
+grid_info.cpp:    avg_mu = avg_mu/(weight + 1e-15)*hbarc;
+grid_info.cpp:    std_T  = sqrt(std_T/(weight + 1e-15)*hbarc*hbarc - avg_T*avg_T);
+grid_info.cpp:    std_mu = sqrt(std_mu/(weight + 1e-15)*hbarc*hbarc - avg_mu*avg_mu);
+grid_info.cpp:    if (fabs(tau - DATA.tau0) < 1e-10) {
+grid_info.cpp:                    - (DATA.eta_size)/2.0);
+grid_info.cpp:                double x_local    = - DATA.x_size/2. + ix*DATA.delta_x;
+grid_info.cpp:                double y_local    = - DATA.y_size/2. + iy*DATA.delta_y;
+grid_info.cpp:                double x_local   = (- DATA.x_size/2. + ix*DATA.delta_x - x_o);
+grid_info.cpp:                double y_local   = (- DATA.y_size/2. + iy*DATA.delta_y - y_o);
+grid_info.cpp:                double T_xx_ideal   = e_local*ux*ux - P_local*(-1. - ux*ux);
+grid_info.cpp:                double T_yy_ideal   = e_local*uy*uy - P_local*(-1. - uy*uy);
+grid_info.cpp:                double T_xx         = T_xx_ideal + pi_xx - bulk_Pi*(-1 - ux*ux);
+grid_info.cpp:                double T_yy         = T_yy_ideal + pi_yy - bulk_Pi*(-1 - uy*uy);
+grid_info.cpp:                ideal_num1 += weight_local*(T_xx_ideal - T_yy_ideal);
+grid_info.cpp:                full_num1  += weight_local*(T_xx - T_yy);
+hydro_source.cpp:    if (DATA.Initial_profile == 13) {  // MC-Glauber-LEXUS
+hydro_source.cpp://! which are produced from the MC-Glauber-LEXUS model
+hydro_source.cpp:        text_stream >> new_string->norm >> new_string->delta_E
+hydro_source.cpp:                    >> new_string->tau_form
+hydro_source.cpp:                    >> new_string->tau_0 >> new_string->eta_s_0
+hydro_source.cpp:                    >> new_string->x_perp >> new_string->y_perp
+hydro_source.cpp:                    >> new_string->eta_s_left >> new_string->eta_s_right
+hydro_source.cpp:                    >> new_string->y_l >> new_string->y_r
+hydro_source.cpp:                    >> new_string->frac_l >> new_string->frac_r
+hydro_source.cpp:                    >> new_string->y_l_i;
+hydro_source.cpp:            text_stream >> new_string->y_r_i;
+hydro_source.cpp:        double temp_factor1 = (new_string->tau_0*new_string->tau_0
+hydro_source.cpp:                               - new_string->tau_form*new_string->tau_form);
+hydro_source.cpp:        double temp_factor2 = (new_string->tau_0
+hydro_source.cpp:                        *cosh(new_string->eta_s_left - new_string->eta_s_0));
+hydro_source.cpp:        double temp_factor3 = (new_string->tau_0
+hydro_source.cpp:                    *cosh(new_string->eta_s_right - new_string->eta_s_0));
+hydro_source.cpp:            temp_factor2 + sqrt(temp_factor2*temp_factor2 - temp_factor1));
+hydro_source.cpp:            temp_factor3 + sqrt(temp_factor3*temp_factor3 - temp_factor1));
+hydro_source.cpp:        new_string->tau_end_left = tau_end_left_local;
+hydro_source.cpp:        new_string->tau_end_right = tau_end_right_local;
+hydro_source.cpp:        if (new_string->eta_s_left > new_string->eta_s_0) {
+hydro_source.cpp:            new_string->tau_start = tau_end_left_local;
+hydro_source.cpp:            new_string->eta_s_start = new_string->eta_s_left;
+hydro_source.cpp:        } else if (new_string->eta_s_right < new_string->eta_s_0) {
+hydro_source.cpp:            new_string->tau_start = tau_end_right_local;
+hydro_source.cpp:            new_string->eta_s_start = new_string->eta_s_right;
+hydro_source.cpp:            new_string->tau_start = new_string->tau_0 + new_string->tau_form;
+hydro_source.cpp:            new_string->eta_s_start = new_string->eta_s_0;
+hydro_source.cpp:        double source_tau = new_string->tau_form;
+hydro_source.cpp:        if (new_string->tau_end_left > new_string->tau_end_right) {
+hydro_source.cpp:            source_tau = new_string->tau_end_left;
+hydro_source.cpp:            source_tau = new_string->tau_end_right;
+hydro_source.cpp:        if (source_tau_min > (new_string->tau_0 + new_string->tau_form)) {
+hydro_source.cpp:            source_tau_min = new_string->tau_0 + new_string->tau_form;
+hydro_source.cpp:        total_baryon_number += it->frac_l + it->frac_r;
+hydro_source.cpp:        text_stream >> pid >> new_parton->px >> new_parton->py >> pz_local
+hydro_source.cpp:                    >> new_parton->mass
+hydro_source.cpp:                    >> new_parton->x >> new_parton->y >> z_local >> t_local;
+hydro_source.cpp:        new_parton->E = sqrt(  new_parton->mass*new_parton->mass
+hydro_source.cpp:                            + new_parton->px*new_parton->px
+hydro_source.cpp:                            + new_parton->py*new_parton->py
+hydro_source.cpp:        new_parton->tau      = sqrt(t_local*t_local - z_local*z_local);
+hydro_source.cpp:        new_parton->eta_s    = 0.5*log( (t_local + z_local)
+hydro_source.cpp:                                      /(t_local - z_local + 1e-15));
+hydro_source.cpp:        new_parton->rapidity = 0.5*log( (new_parton->E + pz_local)
+hydro_source.cpp:                                      /(new_parton->E - pz_local));
+hydro_source.cpp:        double u_perp = (sqrt(  new_parton->px*new_parton->px
+hydro_source.cpp:                              + new_parton->py*new_parton->py)
+hydro_source.cpp:                         /new_parton->mass);
+hydro_source.cpp:        new_parton->rapidity_perp = asinh(u_perp);
+hydro_source.cpp:            new_parton->baryon_number   =  1./3.;
+hydro_source.cpp:            new_parton->strangness      =  0.0  ;
+hydro_source.cpp:            new_parton->electric_charge = -1./3.;
+hydro_source.cpp:        } else if (pid == -1) {
+hydro_source.cpp:            // anti-d quark
+hydro_source.cpp:            new_parton->baryon_number   = -1./3.;
+hydro_source.cpp:            new_parton->strangness      =  0.0  ;
+hydro_source.cpp:            new_parton->electric_charge =  1./3.;
+hydro_source.cpp:            new_parton->baryon_number   =  1./3.;
+hydro_source.cpp:            new_parton->strangness      =  0.0  ;
+hydro_source.cpp:            new_parton->electric_charge =  2./3.;
+hydro_source.cpp:        } else if (pid == -2) {
+hydro_source.cpp:            // anti-u quark
+hydro_source.cpp:            new_parton->baryon_number   = -1./3.;
+hydro_source.cpp:            new_parton->strangness      =  0.0  ;
+hydro_source.cpp:            new_parton->electric_charge = -2./3.;
+hydro_source.cpp:            new_parton->baryon_number   =  1./3.;
+hydro_source.cpp:            new_parton->strangness      = -1.0  ;
+hydro_source.cpp:            new_parton->electric_charge = -1./3.;
+hydro_source.cpp:        } else if (pid == -3) {
+hydro_source.cpp:            // anti-s quark
+hydro_source.cpp:            new_parton->baryon_number   = -1./3.;
+hydro_source.cpp:            new_parton->strangness      =  1.0  ;
+hydro_source.cpp:            new_parton->electric_charge =  1./3.;
+hydro_source.cpp:        if (source_tau_max < new_parton->tau) {
+hydro_source.cpp:            source_tau_max = new_parton->tau;
+hydro_source.cpp:        if (source_tau_min > new_parton->tau) {
+hydro_source.cpp:            source_tau_min = new_parton->tau;
+hydro_source.cpp:            if ((   it->tau_end_left >= (tau_local - 1./2.*dtau)
+hydro_source.cpp:                 && it->tau_end_left <  (tau_local + 3./2.*dtau))
+hydro_source.cpp:                || (   it->tau_end_right >= (tau_local - 1./2.*dtau)
+hydro_source.cpp:                    && it->tau_end_right <  (tau_local + 3./2.*dtau))) {
+hydro_source.cpp:            if (   it->tau_start <= tau_local + 3./2.*dtau
+hydro_source.cpp:                && std::max(it->tau_end_left, it->tau_end_right) >= tau_local - dtau/2.) {
+hydro_source.cpp:            double tau_dis = it->tau - tau_local;
+hydro_source.cpp:            const double tau_0     = it->tau_0;
+hydro_source.cpp:            const double delta_tau = it->tau_form;
+hydro_source.cpp:            double x_dis = x - it->x_perp;
+hydro_source.cpp:            double y_dis = y - it->y_perp;
+hydro_source.cpp:            // f(eta) = 0.5*(- Erf((eta_L - eta)/sigma)
+hydro_source.cpp:            //               + Erf((eta_R - eta)/sigma))
+hydro_source.cpp:            double tau_L = tau - dtau/2.;
+hydro_source.cpp:                                        - delta_tau*delta_tau)
+hydro_source.cpp:                                       /(2.*tau_L*tau_0 + 1e-10));
+hydro_source.cpp:            double eta_s_L = std::min(it->eta_s_right, it->eta_s_0 - eta_s_shift);
+hydro_source.cpp:            double eta_s_R = std::max(it->eta_s_left,  it->eta_s_0 + eta_s_shift);
+hydro_source.cpp:                                          - delta_tau*delta_tau)
+hydro_source.cpp:                                         /(2.*tau_next*tau_0 + 1e-10));
+hydro_source.cpp:            double eta_s_L_next = std::max(it->eta_s_left,  it->eta_s_0 - eta_s_next_shift);
+hydro_source.cpp:            double eta_s_R_next = std::min(it->eta_s_right, it->eta_s_0 + eta_s_next_shift);
+hydro_source.cpp:                if (   eta_s > eta_s_L_next - skip_dis_eta 
+hydro_source.cpp:                    exp_eta_s += 0.5*(- erf((eta_s_L_next - eta_s)/sigma_eta)
+hydro_source.cpp:                                      + erf((eta_s_L - eta_s)/sigma_eta));
+hydro_source.cpp:                if (   eta_s > eta_s_R - skip_dis_eta 
+hydro_source.cpp:                    exp_eta_s += 0.5*(- erf((eta_s_R - eta_s)/sigma_eta)
+hydro_source.cpp:                                      + erf((eta_s_R_next - eta_s)/sigma_eta));
+hydro_source.cpp:            double exp_xperp = exp(-(x_dis*x_dis + y_dis*y_dis)
+hydro_source.cpp:            if (eta_s < it->eta_s_left) {
+hydro_source.cpp:                e_frac = it->frac_l;
+hydro_source.cpp:            } else if (eta_s < it->eta_s_right) {
+hydro_source.cpp:                e_frac = (it->frac_l
+hydro_source.cpp:                          + (it->frac_r - it->frac_l)
+hydro_source.cpp:                            /(it->eta_s_right - it->eta_s_left)
+hydro_source.cpp:                            *(eta_s - it->eta_s_left));
+hydro_source.cpp:                e_frac = it->frac_r;
+hydro_source.cpp:            e_local *= it->norm*sfactor;  // 1/fm^4
+hydro_source.cpp:                    it->y_l + (it->y_r - it->y_l)
+hydro_source.cpp:                                /(it->eta_s_right - it->eta_s_left)
+hydro_source.cpp:                                *(eta_s - it->eta_s_left));
+hydro_source.cpp:            double y_dump = ((1. - string_quench_factor)*y_string
+hydro_source.cpp:            double cosh_long = cosh(y_dump - eta_s);
+hydro_source.cpp:            double sinh_long = sinh(y_dump - eta_s);
+hydro_source.cpp:            if (std::abs(y_dump_perp) > 1e-6) {
+hydro_source.cpp:            if (   it->tau_end_left >= tau - dtau/2.
+hydro_source.cpp:                && it->tau_end_left <  tau + dtau/2.) {
+hydro_source.cpp:            if (   it->tau_end_right >= tau - dtau/2.
+hydro_source.cpp:                && it->tau_end_right <  tau + dtau/2.) {
+hydro_source.cpp:            double x_dis = x - it->x_perp;
+hydro_source.cpp:            double y_dis = y - it->y_perp;
+hydro_source.cpp:                double eta_dis_left = std::abs(eta_s - it->eta_s_left);
+hydro_source.cpp:                    exp_eta_s_left = (exp(-eta_dis_left*eta_dis_left
+hydro_source.cpp:                double eta_dis_right = std::abs(eta_s - it->eta_s_right);
+hydro_source.cpp:                    exp_eta_s_right = (exp(-eta_dis_right*eta_dis_right
+hydro_source.cpp:                      exp_eta_s_left*it->frac_l*it->E_baryon_norm_L
+hydro_source.cpp:                    + exp_eta_s_right*it->frac_r*it->E_baryon_norm_R);
+hydro_source.cpp:                double exp_xperp = exp(-(x_dis*x_dis + y_dis*y_dis)
+hydro_source.cpp:        double tau_dis_max = tau - source_tau_max;
+hydro_source.cpp:                double x_dis = x - it->x;
+hydro_source.cpp:                double y_dis = y - it->y;
+hydro_source.cpp:                double eta_s_dis = eta_s - it->eta_s;
+hydro_source.cpp:                double exp_xperp = exp(-(x_dis*x_dis + y_dis*y_dis)
+hydro_source.cpp:                        exp(-eta_s_dis*eta_s_dis/(sigma_eta*sigma_eta)));
+hydro_source.cpp:                double p_perp_sq = it->px*it->px + it->py*it->py;
+hydro_source.cpp:                double m_perp = sqrt(it->mass*it->mass + p_perp_sq);
+hydro_source.cpp:                j_mu[0] += m_perp*cosh(it->rapidity - eta_s)*f_smear;
+hydro_source.cpp:                j_mu[1] += it->px*f_smear;
+hydro_source.cpp:                j_mu[2] += it->py*f_smear;
+hydro_source.cpp:                j_mu[3] += m_perp*sinh(it->rapidity - eta_s)*f_smear;
+hydro_source.cpp:            // space-time grid
+hydro_source.cpp:            //double tau_dis_left = fabs(tau - it->tau_end_left);
+hydro_source.cpp:            //double tau_dis_right = fabs(tau - it->tau_end_right);
+hydro_source.cpp:            if (   it->tau_end_left >= tau - dtau/2.
+hydro_source.cpp:                && it->tau_end_left <  tau + dtau/2.) {
+hydro_source.cpp:            if (   it->tau_end_right >= tau - dtau/2.
+hydro_source.cpp:                && it->tau_end_right <  tau + dtau/2.) {
+hydro_source.cpp:            double x_dis = x - it->x_perp;
+hydro_source.cpp:            double y_dis = y - it->y_perp;
+hydro_source.cpp:                double eta_dis_left = std::abs(eta_s - it->eta_s_left);
+hydro_source.cpp:                    exp_eta_s_left = (exp(-eta_dis_left*eta_dis_left
+hydro_source.cpp:                double eta_dis_right = std::abs(eta_s - it->eta_s_right);
+hydro_source.cpp:                    exp_eta_s_right = (exp(-eta_dis_right*eta_dis_right
+hydro_source.cpp:                    exp_eta_s_left*it->frac_l + exp_eta_s_right*it->frac_r);
+hydro_source.cpp:                double exp_xperp = exp(-(x_dis*x_dis + y_dis*y_dis)
+hydro_source.cpp:                    (  exp_eta_s_left*it->frac_l*it->y_l
+hydro_source.cpp:                     + exp_eta_s_right*it->frac_r*it->y_r)
+hydro_source.cpp:                    /(  exp_eta_s_left*it->frac_l
+hydro_source.cpp:                      + exp_eta_s_right*it->frac_r));
+hydro_source.cpp:                double y_dump = ((1. - parton_quench_factor)*rapidity_local
+hydro_source.cpp:                               - u_mu[1]*sinh(y_dump_perp)*cos_phi_flow
+hydro_source.cpp:                               - u_mu[2]*sinh(y_dump_perp)*sin_phi_flow
+hydro_source.cpp:                               - u_mu[3]*sinh(y_dump)*cosh(y_dump_perp));
+hydro_source.cpp:        double tau_dis_max = tau - source_tau_max;
+hydro_source.cpp:                // space-time grid
+hydro_source.cpp:                double x_dis = x - it->x;
+hydro_source.cpp:                double y_dis = y - it->y;
+hydro_source.cpp:                double eta_s_dis = eta_s - it->eta_s;
+hydro_source.cpp:                double exp_xperp = exp(-(x_dis*x_dis + y_dis*y_dis)
+hydro_source.cpp:                        exp(-eta_s_dis*eta_s_dis/(sigma_eta*sigma_eta)));
+hydro_source.cpp:                double y_dump = ((1. - parton_quench_factor)*it->rapidity
+hydro_source.cpp:                double y_dump_perp = ((1. - parton_quench_factor)*it->rapidity_perp
+hydro_source.cpp:                    - tanh(y_dump_perp)*sinh_y_perp_flow/cosh(y_dump - eta_s)
+hydro_source.cpp:                    - tanh(y_dump - eta_s)*u_mu[3]);
+hydro_source.cpp:    int n_tau_steps = static_cast<int>((tau - tau0)/dtau);
+hydro_source.cpp:    int n_tau_steps = static_cast<int>((tau - tau0)/dtau);
+hydro_source.cpp:    const double deta           = 2.*eta_range/(neta - 1);
+hydro_source.cpp:            double eta_local = - eta_range + ieta*deta;
+hydro_source.cpp:            double f_eta = (it->frac_l
+hydro_source.cpp:                + (it->frac_l - it->frac_r)/(it->eta_s_left - it->eta_s_right)
+hydro_source.cpp:                  *(eta_local - it->eta_s_left));
+hydro_source.cpp:            double y_eta = (it->y_l
+hydro_source.cpp:                + (it->y_l - it->y_r)/(it->eta_s_left - it->eta_s_right)
+hydro_source.cpp:                  *(eta_local - it->eta_s_left));
+hydro_source.cpp:            double expon_left  = (it->eta_s_left - eta_local)/sigma_eta;
+hydro_source.cpp:            double expon_right = (it->eta_s_right - eta_local)/sigma_eta;
+hydro_source.cpp:            double e_eta = 0.5*(- erf(expon_left) + erf(expon_right));
+hydro_source.cpp:            double e_baryon_L = exp(-expon_left*expon_left);
+hydro_source.cpp:            double e_baryon_R = exp(-expon_right*expon_right);
+hydro_source.cpp:        double E_string = (  it->frac_l*cosh(it->y_l_i)
+hydro_source.cpp:                           + it->frac_r*cosh(it->y_r_i)
+hydro_source.cpp:                           - it->frac_l*cosh(it->y_l)
+hydro_source.cpp:                           - it->frac_r*cosh(it->y_r));
+hydro_source.cpp:        it->norm = E_string/E_string_norm;
+hydro_source.cpp:        E_baryon_L_norm *= it->frac_l*prefactor_etas*deta;
+hydro_source.cpp:        E_baryon_R_norm *= it->frac_r*prefactor_etas*deta;
+hydro_source.cpp:        double E_baryon_L   = it->frac_l*cosh(it->y_l);
+hydro_source.cpp:        double E_baryon_R   = it->frac_r*cosh(it->y_r);
+hydro_source.cpp:        it->E_baryon_norm_L = E_baryon_L/E_baryon_L_norm;
+hydro_source.cpp:        it->E_baryon_norm_R = E_baryon_R/E_baryon_R_norm;
+init.cpp:        DATA.tau0 = hydro_source_terms.get_source_tau_min() - DATA.delta_tau;
+init.cpp:        music_message.info(" ----- information on initial distribution -----");
+init.cpp:        // - IPGlasma initial conditions with initial flow
+init.cpp:        music_message.info(" ----- information on initial distribution -----");
+init.cpp:        // - IPGlasma initial conditions with initial flow
+init.cpp:        music_message.info(" ----- information on initial distribution -----");
+init.cpp:        music_message.info(" ----- information on initial distribution -----");
+init.cpp:        double epsilon = temp_profile_ed[ieta]/hbarc;   // fm^-4
+init.cpp:                DATA.x_size = -dummy2*2;
+init.cpp:                DATA.y_size = -dummy3*2;
+init.cpp:    double eta = (DATA.delta_eta)*ieta - (DATA.eta_size)/2.0;
+init.cpp:                 - (utau*utau - ux*ux)*temp_profile_pixx[idx]
+init.cpp:                 - (utau*utau - uy*uy)*temp_profile_piyy[idx])
+init.cpp:                /(utau*utau - ueta*ueta));
+init.cpp:                DATA.x_size = -dummy2*2;
+init.cpp:                DATA.y_size = -dummy3*2;
+init.cpp:    double eta = (DATA.delta_eta)*(ieta) - (DATA.eta_size)/2.0;
+init.cpp:                arena_current(ix, iy, ieta).pi_b = epsilon/3. - pressure;
+init.cpp:    double eta = (DATA.delta_eta)*ieta - (DATA.eta_size)/2.0;
+init.cpp:                epsilon = max(epsilon, 1e-11);
+init.cpp:	double x = DATA.delta_x*(ix*2.0 - nx)/2.0;
+init.cpp:	    double y = DATA.delta_y*(iy*2.0 - ny)/2.0;
+init.cpp://    		double eta = (DATA.delta_eta)*ieta - (DATA.eta_size)/2.0;
+init.cpp:			stretch += ecc[n-1]*cos(n*phi - n*psi[n-1]);
+init.cpp:    lower=-m;//lower limit of integral
+init.cpp:    h = (upper-lower)/(n-1);//length of each step
+init.cpp:    //h = (upper-lower)/(n-1);//length of each step
+init.cpp:      //x=0.2*(ix*2.0-nx)/2.0;
+init.cpp:        //y=0.2*(iy*2.0-nx)/2.0;
+init.cpp:        sum = sum + rho0/(1+exp((sqrt((pow(x,2)+pow(y,2))*stretch+pow(z,2))-R_0)/chi)) +
+init.cpp:        rho0/(1+exp((sqrt((pow(x,2)+pow(y,2))*stretch+pow((z+h),2))-R_0)/chi));
+init.cpp:        //sum = sum + rho0/(1+exp((sqrt((pow(x,2)+pow(y,2))+pow(z,2))-R_0)/chi)) +
+init.cpp:        //rho0/(1+exp((sqrt((pow(x,2)+pow(y,2))+pow((z+h),2))-R_0)/chi));
+init.cpp:		epsilon = max(epsilon, 1e-18);
+init.cpp:			stretchU += eccU[n]*cos(n*phi - n*psiU[n]);
+init.cpp:		//u[1] = 0.04*0.03*4/3/epsilon*exp(-(x*x+y*y)*stretchU/(2*Rgauss*Rgauss))*cos(phi);
+init.cpp:		//u[2] = 0.04*0.03*4/3/epsilon*exp(-(x*x+y*y)*stretchU/(2*Rgauss*Rgauss))*sin(phi);
+init.cpp://		u[0] = sqrt(1.0-u[1]*u[1]-u[2]*u[2]);
+init.cpp:	double x = DATA.delta_x*(ix*2.0 - nx)/2.0;
+init.cpp:	    double y = DATA.delta_y*(iy*2.0 - ny)/2.0;
+init.cpp://    		double eta = (DATA.delta_eta)*ieta - (DATA.eta_size)/2.0;
+init.cpp:			stretch += ecc[n-1]*cos(n*phi - n*psi[n-1]);
+init.cpp:		double epsilon = N*exp(-r2*stretch/(2*Rgauss*Rgauss));
+init.cpp:		epsilon = max(epsilon, 1e-11);
+init.cpp:			stretchU += eccU[n]*cos(n*phi - n*psiU[n]);
+init.cpp:		//u[1] = 0.04*0.03*4/3/epsilon*exp(-(x*x+y*y)*stretchU/(2*Rgauss*Rgauss))*cos(phi);
+init.cpp:		//u[2] = 0.04*0.03*4/3/epsilon*exp(-(x*x+y*y)*stretchU/(2*Rgauss*Rgauss))*sin(phi);
+init.cpp://		u[0] = sqrt(1.0-u[1]*u[1]-u[2]*u[2]);
+init.cpp:            double epsilon = 1e-12;
+init.cpp:        double eta = (DATA.delta_eta)*ieta - (DATA.eta_size)/2.0;
+init.cpp:    double eta = (DATA.delta_eta)*ieta - (DATA.eta_size)/2.0;
+init.cpp:        double x_local = - DATA.x_size/2. + ix*DATA.delta_x;
+init.cpp:            double y_local = - DATA.y_size/2. + iy*DATA.delta_y;
+init.cpp:    // Hirano's plateau + Gaussian fall-off
+init.cpp:        double exparg1 = (fabs(eta) - DATA.eta_flat/2.0)/DATA.eta_fall_off;
+init.cpp:        res = exp(-exparg*theta(exparg1));
+init.cpp:        // Woods-Saxon
+init.cpp:        res = (1.0 + exp(-ws_R/ws_a))/(1.0 + exp((abs(eta) - ws_R)/ws_a));
+init.cpp:        res = (1. - eta/DATA.beam_rapidity)*res;
+init.cpp:        const double exparg1   = (eta - eta_0)/eta_width;
+init.cpp:        res = norm*(exp(-exparg1*exparg1/2.0) + exp(-exparg2*exparg2/2.0));
+init.cpp:        double exparg1     = (eta_abs - eta_0)/delta_eta_1;
+init.cpp:        double exparg2     = (eta_abs - eta_0)/delta_eta_2;
+init.cpp:                          + (1. - A)*sqrt(2.*M_PI)*delta_eta_2 + 2.*A*eta_0));
+init.cpp:        res = norm*(theta*exp(-exparg1*exparg1/2.)
+init.cpp:                    + (1. - theta)*(A + (1. - A)*exp(-exparg2*exparg2/2.)));
+init.cpp:    double eta_0       = -fabs(DATA.eta_rhob_0);
+init.cpp:        exp_arg = (eta - eta_0)/delta_eta_1;
+init.cpp:        exp_arg = (eta - eta_0)/delta_eta_2;
+init.cpp:    double res = norm*exp(-exp_arg*exp_arg);
+init.cpp:        exp_arg = (eta - eta_0)/delta_eta_2;
+init.cpp:        exp_arg = (eta - eta_0)/delta_eta_1;
+init.cpp:    double res = norm*exp(-exp_arg*exp_arg);
+init.cpp:        double eta_local = (DATA.delta_eta)*ieta - (DATA.eta_size)/2.0;
+init.cpp:            double x_local = -DATA.x_size/2. + ix*DATA.delta_x;
+init.cpp:                double y_local = -DATA.y_size/2. + iy*DATA.delta_y;
+init.cpp:    complex<double> eps[20][20] = {{0}}; // moment <z^j z*^k> =  <r^(j+k) e^{i(j-k) phi}>
+init.cpp:	    double x = DATA.delta_x*(ix*2.0 - DATA.nx)/2.0;
+init.cpp://	    double x = -DATA.x_size/2. + ix*DATA.delta_x;
+init.cpp:		double y = DATA.delta_y*(iy*2.0 - DATA.ny)/2.0;
+init.cpp://		double y = -DATA.y_size/2. + iy*DATA.delta_y;
+init.cpp:		double T00 = (e+p)*u[0]*u[0] - p + pi00;// T^{tau tau}
+init.cpp:	complex<double> W02 = eps[1][1] - eps[1][0]*eps[0][1];
+init.cpp:	complex<double> W22 = 0.5*(eps[2][0]+eps[2][0] - W11*W11);
+init.cpp:	//complex<double> W44 = -(1.0/24.0)*(pow(W11,4)+12*pow(W11,2)*W22+12*pow(W22,2)+24*W11*W33-24*eps[4][0]);
+init.cpp:	complex<double> W33 = eps[3][0] + eps[1][0]*(3.0*eps[2][0] - 2.0*eps[1][0]*eps[1][0]);
+init.cpp:  //complex<double> W33 = eps[6][0] + eps[2][0]*(3.0*eps[4][0] - 2.0*eps[2][0]*eps[2][0]);
+init.cpp:  complex<double> W44 = -(1.0/24.0)*(pow(W11,4)+12.0*pow(W11,2)*W22+12.0*pow(W22,2)+24.0*W11*W33-24.0*eps[4][0]);
+init.cpp:  //complex<double> W55 = eps[5][0]+20.0*eps[3][0]*eps[1][0]*eps[1][0]-60.0*eps[2][0]*eps[1][0]*eps[1][0]*eps[1][0]+5.0*(6.0*eps[2][0]*eps[2][0]-eps[4][0])*eps[1][0]-10.0*eps[2][0]*eps[3][0]+24.0*eps[1][0]*eps[1][0]*eps[1][0]*eps[1][0]*eps[1][0];
+init.cpp:  complex<double> W55 = -(1.0/120.0)*(pow(W11,5)+20.0*pow(W11,3)*W22+60.0*(W11*pow(W22,2)+pow(W11,2)*W33)+120.0*W22*W33+120.0*W11*W44-120.0*eps[5][0]);
+init.cpp:	complex<double> SW02 = epsS[1][1] - epsS[1][0]*eps[0][1];
+init.cpp:	complex<double> SW22 = epsS[2][0] - SW11*SW11;
+init.cpp:	complex<double> SW13 = epsS[2][1] - epsS[2][0]*epsS[0][1]
+init.cpp:	    - 2.0*epsS[1][1]*epsS[1][0] + 2.0*epsS[1][0]*epsS[1][0]*epsS[0][1];
+init.cpp:	complex<double> SW33 = epsS[3][0] + epsS[1][0]*(3.0*epsS[2][0] - 2.0*epsS[1][0]*epsS[1][0]);
+init.cpp:	cout << "eps2 = " << -W22/W02 << " "<<-eps[2][0]/eps[1][1]<<endl;
+init.cpp:	cout << "eps3 = " << -W33/pow(W02,1.5) << endl;
+init.cpp:	cout << "eps4 = " << -W44/pow(W02,2) << " " << -eps[4][0]/eps[2][2]<<endl;
+init.cpp:  cout << "eps6 = "  << -eps[6][0]/eps[3][3]<<endl;
+init.cpp:	cout << "eps2S = " << -SW22/SW02 << " " <<-epsS[2][0]/epsS[1][1]<<endl;
+init.cpp:	cout << "eps3S = " << -SW33/pow(SW02,1.5) << endl;
+init.cpp:	cout << "eps1S = " << -SW13/pow(SW02,1.5) << endl;
+init.cpp:	    double x = DATA.delta_x*(ix*2.0 - DATA.nx)/2.0;
+init.cpp:	    x += -W11.real();
+init.cpp://	    double x = -DATA.x_size/2. + ix*DATA.delta_x;
+init.cpp:		double y = DATA.delta_y*(iy*2.0 - DATA.ny)/2.0;
+init.cpp:		y += -W11.imag();
+init.cpp:  cout << "Alternate eps1 = " << -eps[1][0]/den1 << endl;
+init.cpp:	cout << "Alternate eps2 = " << -eps[2][0]/den2 << endl;
+init.cpp:  cout << "Alternate eps3 = " << -eps[3][0]/den3 << endl;
+init.cpp:  cout << "Alternate eps4 = " << -eps[4][0]/den4 << endl;
+init.cpp:  cout << "Alternate eps5 = " << -eps[5][0]/den5 << endl;
+init.cpp:  cout << "Alternate eps6 = " << -eps[6][0]/den6 << endl;
+init.cpp:  cout << "Alternate eps7 = " << -eps[7][0]/den7 << endl;
+init.cpp:  cout << "eps2S = " << -SW22/SW02 << " " <<-epsS[2][0]/epsS[1][1]<<" "<<-epsS[2][0]/den2s<<endl;
+init.cpp:  DATA.exc2 = abs(-eps[2][0]/den2);
+init.cpp:  DATA.exc3 = abs(-eps[3][0]/den3);
+init.cpp:  DATA.exc4 = abs(-eps[4][0]/den4);
+init.cpp:  DATA.exc5 = abs(-eps[5][0]/den5);
+init.cpp://  cout << "Alternate eps2s = " << -epsS[2][0]/den2s << endl;
+init.cpp:  outfile3<<" " << abs(-epsS[2][0]/den2s) << " " << abs(-epsS[3][0]/den3s) << " " << abs(-epsS[4][0]/den4s) << " " << abs(-epsS[5][0]/den5s)
+init.cpp:  << " " << abs(-epsS[6][0]/den6s) << " " << abs(-epsS[7][0]/den7s) << endl;
+init.cpp:  outfile4<<" " << abs(-eps[2][0]/den2) << " " << abs(-eps[3][0]/den3) << " " << abs(-eps[4][0]/den4) << " " << abs(-eps[5][0]/den5) <<
+init.cpp:  " " << abs(-eps[6][0]/den6) << " " << abs(-eps[7][0]/den7) << endl;
+init.cpp:  outfile5<<" " << abs(-W22/W02) << " " << abs(-W33/pow(W02,1.5)) << " " << abs(-W44/pow(W02,2.0)) << " " << abs(-W55/pow(W02,2.5)) << endl;
+main.cpp:// Massively cleaned up and improved by Chun Shen 2015-2016
+minmod.cpp:    test_dx = test.minmod_dx(-2.0, -1.0, 0.0);
+minmod.cpp:    CHECK(test_dx == -1.0);
+minmod.cpp:    CHECK(test_dx == doctest::Approx(-0.18).epsilon(0.0001));
+minmod.cpp:    CHECK(test_dx == doctest::Approx(-0.18).epsilon(0.0001));
+music.cpp:// Massively cleaned up and improved by Chun Shen 2015-2016
+music.cpp:    init->InitArena(arena_prev, arena_current, arena_future);
+music.cpp:    evolve->EvolveIt(arena_prev, arena_current, arena_future);
+music.cpp://! this is a shell function to run Cooper-Frye
+music.cpp:    freeze->CooperFrye_pseudo(DATA.particleSpectrumNumber, mode, &DATA, &eos);
+music_logo.cpp:            std::cout << "|         ,'  , `.               .--.--.      ,---,  ,----..   |"   << std::endl;
+music_logo.cpp:            std::cout << "|      ,-+-,.' _ |         ,--, /  /    '. ,`--.' | /   /   \\  |"  << std::endl;
+music_logo.cpp:            std::cout << "|   ,-+-. ;   , ||       ,'_ /||  :  /`. / |   :  :|   :     : |"   << std::endl;
+music_logo.cpp:            std::cout << "|  ,--.'|'   |  ;|  .--. |  | :;  |  |--`  :   |  '.   |  ;. / |"   << std::endl;
+music_logo.cpp:            std::cout << "| |   |  ,', |  ':,'_ /| :  . ||  :  ;_    |   :  |.   ; /--`  |"   << std::endl;
+music_logo.cpp:            std::cout << "| '   | :  | :  |,|  | ' |  | |  `----.   \\|   |  ||   : |     |"  << std::endl;
+music_logo.cpp:            std::cout << "| ;   . |  ; |--' :  | | :  ' ;  __ \\  \\  |'   :  ;.   | '___  |" << std::endl;
+music_logo.cpp:            std::cout << "| |   : |  | ,    |  ; ' |  | ' /  /`--'  /|   |  ''   ; : .'| |"   << std::endl;
+music_logo.cpp:            std::cout << "| |   : '  |/     :  | : ;  ; |'--'.     / '   :  |'   | '/  : |"   << std::endl;
+music_logo.cpp:            std::cout << "| ;   | |`-'      '  :  `--'   \\ `--'---'  ;   |.' |   :    /  |"  << std::endl;
+music_logo.cpp:            std::cout << "| |   ;/          :  ,      .-./           '---'    \\   \\ .'   |" << std::endl;
+music_logo.cpp:            std::cout << "| '---'            `--`----'                         `---`     |"   << std::endl;
+music_logo.cpp:            std::cout << "| <<,-,,-.  (__) )(    )(  (__).-,_|___|_,-._// \\\\  |"       << std::endl;
+music_logo.cpp:            std::cout << "|  (./  \\.)     (__)  (__)      \\_)-' '-(_/(__)(__) |"       << std::endl;
+music_logo.cpp:            std::cout << "| |  \\  /  | |  |  |  |    |   (----`|  | |  ,----' |"   << std::endl;
+music_logo.cpp:            std::cout << "| |  |  |  | |  `--'  | .----)   |   |  | |  `----. |"    << std::endl;
+music_logo.cpp:    std::cout << "MUSIC - a 3+1D viscous relativistic hydrodynamic code for "
+music_logo.cpp:              << "Matthew Luzum, Jean-François Paquet, Björn Schenke, Chun Shen"
+read_in_parameters.cpp:    // boost-invariant
+read_in_parameters.cpp:    //2 for a Woods-Saxon proinput_file
+read_in_parameters.cpp:    // epsilon_freeze: freeze-out energy density in GeV/fm^3
+read_in_parameters.cpp:    // 13: Compute observables from previously-computed thermal spectra
+read_in_parameters.cpp:    // 14: Compute observables from post-decay spectra
+read_in_parameters.cpp:    // 1: EOS-Q from azhydro
+read_in_parameters.cpp:    // e.g., neta=8 and eta_size=8 has 8 cells that run from eta=-4 to eta=3
+read_in_parameters.cpp:    /* x-grid, for instance, runs from 0 to nx */
+read_in_parameters.cpp:            parameter_list.x_size/static_cast<double>(parameter_list.nx - 1);
+read_in_parameters.cpp:            parameter_list.y_size/static_cast<double>(parameter_list.ny - 1);
+read_in_parameters.cpp:    // width of half-Gaussian on each side of a central pleateau in eta
+read_in_parameters.cpp:    // s_factor:  for use with IP-Glasma initial conditions
+read_in_parameters.cpp:    // spectra calculated from zero to this pseudorapidity in +eta and -eta
+read_in_parameters.cpp://constant from Wood-Saxon thickness function
+read_in_parameters.cpp:    // equally-spaced grid in pseudorapidity, pt, and phi
+read_in_parameters.cpp:    // Minmod_Theta: theta parameter in the min-mod like limiter
+read_in_parameters.cpp:    // and use hard-coded T-dependent shear viscosity
+read_in_parameters.cpp:    // and 2 is supposed to use p^(2-alpha)
+read_in_parameters.cpp:    double y_beam = atanh(sqrt(1. - 1./pow(temp_ecm/2., 2.)));
+read_in_parameters.cpp:    double temp_dNdy_y_min = -0.5;
+read_in_parameters.cpp:    double temp_dNdy_eta_min = -2.0;
+read_in_parameters.cpp:    double temp_dNdyptdpt_y_min = -0.5;
+read_in_parameters.cpp:    double temp_dNdyptdpt_eta_min = -0.5;
+read_in_parameters.cpp:    // tolerance for copying spectra -- particles with almost the same mass and chemical potential don't need to be recalculated
+read_in_parameters.cpp:    // When tolerances are set to zero, results are exact -- only particles with exactly the same mass and (PCE, baryon) chemical potential are copied
+read_in_parameters.cpp:    double tempMassTolerance = 1e-5; // maximum fractional difference in mass.
+read_in_parameters.cpp:    // This value (>= 1e-5) reduces the number of particles calculated from 319 to 99.
+read_in_parameters.cpp:    double tempMuTolerance = 1e-2;
+read_in_parameters.cpp:        music_message << "freeze-out time setp is too large! "
+read_in_parameters.cpp:                      << "is too small for a (3+1)-d run! "
+read_in_parameters.cpp:                      << parameter_list.neta << " for a (2+1)-d simulation! "
+read_in_parameters.cpp:        music_message << "For a (2+1)-d simulation, "
+read_in_parameters.cpp:        music_message << "Runge-Kutta order = " << parameter_list.rk_order;
+read_in_parameters.cpp:        music_message << "non-zero eta/s = " << parameter_list.shear_to_s
+read_in_parameters.cpp:                      << "shear delta f in Cooper-Frye! ";
+read_in_parameters.cpp:                      << "bulk delta f in Cooper-Frye!";
+reconst.cpp:    rel_err(1e-9),
+reconst.cpp:    abs_err(1e-10),
+reconst.cpp:    if (flag == -1) {
+reconst.cpp:    } else if (flag == -2) {
+reconst.cpp://! reconstruct TJb from q[0] - q[4]
+reconst.cpp:    if ((T00 < abs_err) || ((T00 - K00/T00) < 0.0)) {
+reconst.cpp:        // at this point, the original values in grid_pt->TJb are not touched.
+reconst.cpp:        return(-2);
+reconst.cpp:    double v_guess = sqrt(1. - 1./(grid_pt.u[0]*grid_pt.u[0] + 1e-15));
+reconst.cpp:        return(-1);
+reconst.cpp:        u[0] = 1./(sqrt(1. - v_solution*v_solution) + v_solution*abs_err);
+reconst.cpp:        epsilon = T00 - v_solution*sqrt(K00);
+reconst.cpp:        double u0_guess = 1./sqrt(1. - v_solution*v_solution);
+reconst.cpp:            return(-1);
+reconst.cpp:        epsilon = T00 - sqrt((1. - 1./(u0_solution*u0_solution))*K00);
+reconst.cpp:    double check_u0_var = std::abs(u[0] - grid_pt.u[0])/grid_pt.u[0];
+reconst.cpp:        if (grid_pt.epsilon > 1e-6 && echo_level > 2) {
+reconst.cpp:        return(-1);
+reconst.cpp:    // Correcting normalization of 4-velocity
+reconst.cpp:    if (fabs(u[0]*u[0] - u_mag_sq - 1.0) > abs_err) {
+reconst.cpp:        double scalef = sqrt((u[0]*u[0] - 1.)/(u_mag_sq + abs_err));
+reconst.cpp:    grid_cell.e = std::max(1e-12, elocal);
+reconst.cpp:        v_next = v_prev - (fv/dfdv);
+reconst.cpp:        rel_error_v = 2.*abs_error_v/(v_next + v_prev + 1e-15);
+reconst.cpp:        u0_next = u0_prev - fu0/dfdu0;
+reconst.cpp:        rel_error_u0 = 2.*abs_error_u0/(u0_next + u0_prev + 1e-15);
+reconst.cpp:    const double epsilon = T00 - v*M;
+reconst.cpp:    const double temp    = sqrt(1. - v*v);
+reconst.cpp:    fv   = v - M/temp1;
+reconst.cpp:    dfdv = 1. - M/(temp1*temp1)*(M*dPde + J0*temp2*dPdrho);
+reconst.cpp:    const double v       = sqrt(1. - 1./(u0*u0));
+reconst.cpp:    const double epsilon = T00 - v*M;
+reconst.cpp:    const double dedu0   = - M/(u0*u0*u0*v + 1e-15);
+reconst.cpp:    const double drhodu0 = - J0/(u0*u0);
+reconst.cpp:    const double temp1 = (T00 + pressure)*(T00 + pressure) - K00;
+reconst.cpp:    fu0    = u0 - temp;
+reso_decay.cpp:// ------------ resonance decays. adapted from azhydro -----------------
+reso_decay.cpp:    if (ptr > particleList[pn].pt[particleList[pn].npt - 1]) {
+reso_decay.cpp:    while ((phir > phiArray[nphi]) && (nphi<(particleList[pn].nphi-1))) {
+reso_decay.cpp:    while (ptr > particleList[pn].pt[npt] && npt<(particleList[pn].npt - 1)) {
+reso_decay.cpp:    while (yr > particleList[pn].y[ny] && ny < (particleList[pn].ny - 1)) {
+reso_decay.cpp:            phiArray[nphi-1], phiArray[nphi], 
+reso_decay.cpp:            particleList[pn].dNdydptdphi[ny-1][npt-1][nphi-1], 
+reso_decay.cpp:            particleList[pn].dNdydptdphi[ny-1][npt-1][nphi], phir);
+reso_decay.cpp:            phiArray[nphi-1], phiArray[nphi], 
+reso_decay.cpp:            particleList[pn].dNdydptdphi[ny-1][npt][nphi-1], 
+reso_decay.cpp:            particleList[pn].dNdydptdphi[ny-1][npt][nphi], phir);
+reso_decay.cpp:        f1 = 1e-30;
+reso_decay.cpp:        f2 = 1e-30;
+reso_decay.cpp:    double val1 = Util::lin_int(particleList[pn].pt[npt-1],
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny-1][npt-1][nphi-1]);
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny][npt-1][nphi-1]);
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny-1][npt][nphi-1]);
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny-1][npt-1][nphi]);
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny][npt][nphi-1]);
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny-1][npt][nphi]);
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny][npt-1][nphi]);
+reso_decay.cpp:        fprintf(stderr,"phi1=%f\n",phiArray[nphi-1]);
+reso_decay.cpp:        fprintf(stderr,"pt1=%f\n",particleList[pn].pt[npt-1]);
+reso_decay.cpp:        fprintf(stderr,"y1=%f\n",particleList[pn].y[ny-1]);
+reso_decay.cpp:    f1 = Util::lin_int(phiArray[nphi-1], phiArray[nphi], 
+reso_decay.cpp:                       particleList[pn].dNdydptdphi[ny][npt-1][nphi-1], 
+reso_decay.cpp:                       particleList[pn].dNdydptdphi[ny][npt-1][nphi], phir);
+reso_decay.cpp:    f2 = Util::lin_int(phiArray[nphi-1], phiArray[nphi], 
+reso_decay.cpp:                       particleList[pn].dNdydptdphi[ny][npt][nphi-1], 
+reso_decay.cpp:        f1 = 1e-30;
+reso_decay.cpp:        f2 = 1e-30;
+reso_decay.cpp:    double val2 = Util::lin_int(particleList[pn].pt[npt-1],
+reso_decay.cpp:    double val = Util::lin_int(particleList[pn].y[ny-1],
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny-1][npt-1][nphi-1]);
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny][npt-1][nphi-1]);
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny-1][npt][nphi-1]);
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny-1][npt-1][nphi]);
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny][npt][nphi-1]);
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny-1][npt][nphi]);
+reso_decay.cpp:        fprintf(stderr,"dN..=%e\n",particleList[pn].dNdydptdphi[ny][npt-1][nphi]);
+reso_decay.cpp:        fprintf(stderr,"phi1=%f\n",phiArray[nphi-1]);
+reso_decay.cpp:        fprintf(stderr,"pt1=%f\n",particleList[pn].pt[npt-1]);
+reso_decay.cpp:        fprintf(stderr,"y1=%f\n",particleList[pn].y[ny-1]);
+reso_decay.cpp:  sume = para->e + para->e0;
+reso_decay.cpp:  D = para->e * para->e0 + para->pl * para->p0 * para->costh +
+reso_decay.cpp:    para->pt * para->p0 * para->sinth * cos (phi) + para->m1 * para->m1;
+reso_decay.cpp:  eR = para->mr * (sume * sume / D - 1.0);
+reso_decay.cpp:  jac = para->mr + eR;
+reso_decay.cpp:  plR = para->mr * sume * (para->pl - para->p0 * para->costh) / D;
+reso_decay.cpp:  ptR = (eR * eR - plR * plR - para->mr * para->mr);
+reso_decay.cpp:  yR = 0.5 * log ((eR + plR) / (eR - plR));
+reso_decay.cpp:  cphiR = -jac * (para->p0 * para->sinth * cos (phi + para->phi)
+reso_decay.cpp:          - para->pt * cos (para->phi)) / (sume * ptR);
+reso_decay.cpp:  sphiR = -jac * (para->p0 * para->sinth * sin (phi + para->phi)
+reso_decay.cpp:          - para->pt * sin (para->phi)) / (sume * ptR);
+reso_decay.cpp:      printf (" sume %15.8le costh %15.8le \n", sume, para->costh);
+reso_decay.cpp:      printf (" pt %15.8le \n", para->pt);
+reso_decay.cpp:      printf (" mt  %15.8le \n", para->mt);
+reso_decay.cpp:      printf (" y %15.8le \n", para->y);
+reso_decay.cpp:      printf (" e %15.8le \n", para->e);
+reso_decay.cpp:      printf (" e0 %15.8le \n", para->e0);
+reso_decay.cpp:      printf (" p0 %15.8le \n", para->p0);
+reso_decay.cpp:      printf (" pl %15.8le \n", para->pl);
+reso_decay.cpp:      printf (" phi %15.8le \n", para->phi);
+reso_decay.cpp:      printf (" m1 %15.8le \n", para->m1);
+reso_decay.cpp:      printf (" m2 %15.8le \n", para->m2);
+reso_decay.cpp:      printf (" m3 %15.8le \n", para->m3);
+reso_decay.cpp:      printf (" mr %15.8le \n", para->mr);
+reso_decay.cpp:      if (cphiR < -1.0)
+reso_decay.cpp:        cphiR = -1.0;
+reso_decay.cpp:      if (cphiR < -1.0)
+reso_decay.cpp:        cphiR = -1.0;
+reso_decay.cpp:    phiR = 2.0 * PI - phiR;
+reso_decay.cpp:  dnr = Edndp3 (yR, ptR, phiR, para->res_num);
+reso_decay.cpp:  double res = sqrt ((tmp->a - x) * (tmp->b - x)
+reso_decay.cpp:             * (x - tmp->c) * (x - tmp->d)) / x;
+reso_decay.cpp:  para->costh = costh;
+reso_decay.cpp:  para->sinth = sqrt (1.0 - para->costh * para->costh);
+reso_decay.cpp:  para->e0 = (para->mr * para->mr + para->m1 * para->m1 - w2) / (2 * para->mr); //particle one energy in resonance rest frame
+reso_decay.cpp:  para->p0 = sqrt (para->e0 * para->e0 - para->m1 * para->m1); // particle one absolute value of three momentum on resonance rest frame
+reso_decay.cpp:  return gauss (PTN1, &Freeze::dnpir1N, -1.0, 1.0, para); //Integrate the "dnpir1N" kernel over cos(theta) using gaussian integration
+reso_decay.cpp:double Freeze::dn3ptN (double x, void* para1)  //The integration kernel for "W" in 3-body decays. x=invariant mass of other particles squared
+reso_decay.cpp:  double e0 =(para->mr * para->mr + para->m1 * para->m1 - x) / (2 * para->mr);
+reso_decay.cpp:  double p0 = sqrt (e0 * e0 - para->m1 * para->m1);
+reso_decay.cpp:  double a = (para->m2 + para->m3) * (para->m2 + para->m3);
+reso_decay.cpp:  double b = (para->m2 - para->m3) * (para->m2 - para->m3);
+reso_decay.cpp:  double re = p0 * sqrt ((x - a) * (x - b)) / x * dn2ptN (x, para);
+reso_decay.cpp:    xdiff = 0.5 * ( xhi - xlo );
+reso_decay.cpp:      s += w[ix] * ( (this->*f)(xoffs+xdiff*p[ix],optvec)
+reso_decay.cpp:                 + (this->*f)(xoffs-xdiff*p[ix],optvec) );
+reso_decay.cpp:* transverse momentum spectrum in GeV^-2 from pions out of resonances
+reso_decay.cpp:/*      /\* in units of GeV^-2,includes phasespace and volume, */
+reso_decay.cpp:  double norm2;         /* 2-body normalization         */
+reso_decay.cpp:  res2 = norm2 * dn2ptN (m2 * m2, &para); //Calls the integration routines for 2-body
+reso_decay.cpp:* transverse momentum spectrum in GeV^-2 from pions out of resonances
+reso_decay.cpp:        /* in units of GeV^-2,includes phasespace and volume,
+reso_decay.cpp:  wmax = (mr - m1) * (mr - m1);
+reso_decay.cpp:    double norm3;         /* normalisation of 3-body integral */
+reso_decay.cpp:        case 2:  // 2-body decay 
+reso_decay.cpp:                m1 -= 0.5*particleList[pn].width;
+reso_decay.cpp:                m2 -= 0.5*particleList[pn2].width;
+reso_decay.cpp:                        // Call the 2-body decay integral and
+reso_decay.cpp:                        // Call the 2-body decay integral and
+reso_decay.cpp:        case 3:  // 3-body decay
+reso_decay.cpp:            paranorm.b = (mr - m1)*(mr - m1);
+reso_decay.cpp:            paranorm.d = (m2 - m3)*(m2 - m3);
+reso_decay.cpp:                        // Call the 3-body decay integral and
+reso_decay.cpp:                        // Call the 3-body decay integral and
+reso_decay.cpp:        case 4:  // 4-body decay (rare and low contribution)
+reso_decay.cpp:            // approximate the 4-body with a 3-body decay with the 4th particle
+reso_decay.cpp:                      + mr - m1 - m2);
+reso_decay.cpp:            paranorm.b = (mr - m1)*(mr - m1);
+reso_decay.cpp:            paranorm.d = (m2 - m3)*(m2 - m3);
+reso_decay.cpp:    for (int i = maxpart-1; i > pn - 1; i--) {
+reso_decay.cpp:            // Check the particle is baryon, anti-baryon or meson
+reso_decay.cpp:            case -1:  // Anti-Baryon
+reso_decay.cpp:                    int pnaR = partid[MHALF - decay[j].reso];
+reso_decay.cpp:                        if ((-part == decay[j].part[k])
+reso_decay.cpp:                            int pnaR = partid[MHALF - decay[j].reso];
+reso_decay.cpp:                                if ((-part == decay[j].part[k])
+u_derivative.cpp:        double gfac = (mu == 0 ? -1.0 : 1.0);
+u_derivative.cpp:            double tfac = (nu==0 ? -1.0 : 1.0);
+u_derivative.cpp:                - (gfac + u_local[a]*u_local[b])*theta_u_local/3.
+u_derivative.cpp:         - (u_local[0]*u_local[0] - u_local[1]*u_local[1])*sigma_local[1][1]
+u_derivative.cpp:         - (u_local[0]*u_local[0] - u_local[2]*u_local[2])*sigma_local[2][2])
+u_derivative.cpp:        /(u_local[0]*u_local[0] - u_local[3]*u_local[3]));
+u_derivative.cpp:    /* note the minus sign at the end because of g[0][0] = -1 */
+u_derivative.cpp:        f = (grid_pt->u[m] - grid_pt_prev->u[m])/DATA.delta_tau;
+u_derivative.cpp:        dUsup[m][0] = -f;  // g00 = -1
+u_derivative.cpp:    /* -u^0 d^0 u^0 + u_m d^0 u^m = 0 */
+u_derivative.cpp:        f += dUsup[m][0]*(grid_pt->u[m]);
+u_derivative.cpp:    f /= grid_pt->u[0];
+u_derivative.cpp:    rhob         = grid_pt->rhob;
+u_derivative.cpp:    eps          = grid_pt->epsilon;
+u_derivative.cpp:    rhob         = grid_pt_prev->rhob;
+u_derivative.cpp:    eps          = grid_pt_prev->epsilon;
+u_derivative.cpp:    f            = (tildemu - tildemu_prev)/(DATA.delta_tau);
+u_derivative.cpp:    dUsup[m][0]  = -f;  // g00 = -1
+util.cpp:// MUSIC - a 3+1D viscous relativistic hydrodynamic code for heavy ion collisions
+util.cpp:// Copyright (C) 2017  Gabriel Denicol, Charles Gale, Sangyong Jeon, Matthew Luzum, Jean-François Paquet, Björn Schenke, Chun Shen
+util.cpp:    aa =(f2-f1)/(x2-x1);
+util.cpp:  bb = f1 - aa * x1;
+util.cpp:    high_idx = length - 1;
+util.cpp:    if ((array[low_idx] - x)*(array[high_idx] - x) > 0.) {
+util.cpp:        exit(-1);
+util.cpp:    while (high_idx - low_idx > 1) {
+util.cpp:        if ((array[low_idx] - x)*(array[mid_idx] - x) > 0.) {

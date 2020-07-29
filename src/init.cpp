@@ -11,7 +11,7 @@
 #include <iterator>
 
 #ifndef _OPENMP
-  #define omp_get_thread_num() 0
+  #define omp_get_thread_num() 0//liner
 #endif
 
 using namespace std;
@@ -130,7 +130,13 @@ void Init::InitTJb(SCGrid &arena_prev, SCGrid &arena_current) {
     } else if (DATA.Initial_profile == 3) {
         music_message.info(" Deformed Gaussian initial condition");
 	initial_distorted_Gaussian(arena_prev, arena_current);
-    } else if (DATA.Initial_profile == 8) {
+    }
+    else if (DATA.Initial_profile == 31) {
+        music_message.info(" Deformed Wood_Saxon initial condition");
+    initial_distorted_Wood_Saxon(arena_prev, arena_current);
+    }
+
+    else if (DATA.Initial_profile == 8) {
         // read in the profile from file
         // - IPGlasma initial conditions with initial flow
         music_message.info(" ----- information on initial distribution -----");
@@ -737,6 +743,104 @@ void Init::initial_trento_XY(int ieta, SCGrid &arena_prev, SCGrid &arena_current
         exit(1);
     }
 }
+void Init::initial_distorted_Wood_Saxon(SCGrid &arena_prev,
+                                           SCGrid &arena_current) {
+	// initial condition is a 2D Gaussian in the transverse plane, deformed to obtain an arbitrary anisotropy
+    const int nx = arena_current.nX();
+    const int ny = arena_current.nY();
+    double a1 = DATA.a1_ecc*2;
+    double a2 = DATA.a2_ecc*2;
+    double a3 = DATA.a3_ecc*2;
+    double a4 = DATA.a4_ecc*2;
+    double a5 = DATA.a5_ecc*2;
+    double a6 = DATA.a6_ecc*2;
+    double a7 = DATA.a7_ecc*2;
+    double N = DATA.norm_ecc;
+
+    double u[4] = {1.0, 0.0, 0.0, 0.0};
+    for (int ix = 0; ix < nx; ix++) {
+	double x = DATA.delta_x*(ix*2.0 - nx)/2.0;
+        for (int iy = 0; iy < ny; iy++) {
+	    double y = DATA.delta_y*(iy*2.0 - ny)/2.0;
+            for (int ieta = 0; ieta < arena_current.nEta(); ieta++) {
+//    		double eta = (DATA.delta_eta)*ieta - (DATA.eta_size)/2.0;
+    //double a = DATA.a_ecc;
+		double phi = atan2(y,x);
+		int nharmonics = 7; //number of harmonics to include in deformation
+		double ecc[nharmonics] = {a1,a2,a3,a4,a5,a6,a7};
+		double psi[nharmonics] = {0,0,0,0,0,0,0};
+		//double r2 = x*x+y*y;
+		double stretch = 1.0;
+		for(int n = 1; n <= nharmonics; n++) {
+			stretch += ecc[n-1]*cos(n*phi - n*psi[n-1]);
+		}
+
+    double sum;
+
+    double z,lower,upper,h;
+    double R_0 = 6.62;
+    double chi = 0.546;
+    int m = 15;
+    double rho0 = DATA.rho0;
+    lower=-m;//lower limit of integral
+    upper=m;//upper limit of integral
+    for(int n = m;n<=150;n+=15){ //number of steps
+    h = (upper-lower)/(n-1);//length of each step
+    z=lower;
+      sum = 0;
+      //x=0.2*(ix*2.0-nx)/2.0;
+      //for(iy=0;iy<ny;iy++){
+        //y=0.2*(iy*2.0-nx)/2.0;
+        for(int i=0;i<n;i++){
+        sum = sum + rho0/(1+exp((sqrt(pow(x,2)+pow(y,2)+pow(z,2))-R_0)/chi)) + rho0/(1+exp((sqrt(pow(x,2)+pow(y,2)+pow((z+h),2))-R_0)/chi));
+        z=z+h;
+      }
+    }
+        sum = sum*(h/2.0);
+        //double E = N*sum*sum;
+        //cout<< ""<<x<<""<<y<<""<<sum<<endl;
+        //printf("%lg %lg %lg %lg %d %lg %lg \n",a,b,x,y,n,sum,E);
+        //fprintf(arq1,"%lg %lg %lg %lg %d %lg %lg\n",a,b,x,y,n,sum,E);
+
+    //}
+
+
+    //fclose(arq1);
+
+		double epsilon = N*stretch*sum*sum;
+		epsilon = max(epsilon, 1e-11);
+            	arena_current(ix, iy, ieta).epsilon = epsilon;
+//            	arena_current(ix, iy, ieta).rhob = 0.0;
+//            	Can also include an initial transverse flow.  Choose the flow vector to always be in the radial direction, but with a magnitude obtained from a derivative of the deformed Gaussian above.
+
+		double eccU[nharmonics] = {0,0.0,0,0,0,0,0};
+		double psiU[nharmonics] = {0,0,0,0,0,0,0};
+		double stretchU = 1.0;
+		for(int n = 0; n < nharmonics; n++) {
+			stretchU += eccU[n]*cos(n*phi - n*psiU[n]);
+		}
+            	u[3] = 0.0;  // boost invariant flow profile
+//		u[1] = 0.2*0.2*stretchU*2*x/(2*Rgauss*Rgauss)*DATA.tau0;
+//		u[2] = 0.2*0.2*stretchU*2*y/(2*Rgauss*Rgauss)*DATA.tau0;
+		//u[1] = 0.04*0.03*4/3/epsilon*exp(-(x*x+y*y)*stretchU/(2*Rgauss*Rgauss))*cos(phi);
+		//u[2] = 0.04*0.03*4/3/epsilon*exp(-(x*x+y*y)*stretchU/(2*Rgauss*Rgauss))*sin(phi);
+//		u[0] = sqrt(1.0-u[1]*u[1]-u[2]*u[2]);
+		u[0] = 1.0;
+		u[1] = 0.0;
+		u[2] = 0.0;
+            	arena_current(ix, iy, ieta).u[0] = u[0];
+            	arena_current(ix, iy, ieta).u[1] = u[1];
+            	arena_current(ix, iy, ieta).u[2] = u[2];
+            	arena_current(ix, iy, ieta).u[3] = u[3];
+
+            	arena_prev(ix, iy, ieta) = arena_current(ix, iy, ieta);
+	    }
+        }
+      }
+    }
+
+
+
 
 void Init::initial_distorted_Gaussian(SCGrid &arena_prev,
                                            SCGrid &arena_current) {
@@ -754,14 +858,21 @@ void Init::initial_distorted_Gaussian(SCGrid &arena_prev,
 		double phi = atan2(y,x);
 		double Rgauss = 3.0; //in fm
 		int nharmonics = 7; //number of harmonics to include in deformation
-		double ecc[nharmonics] = {0,0.6,0,0,0,0,0};
+    double a1 = DATA.a1_ecc;
+    double a2 = DATA.a2_ecc;
+    double a3 = DATA.a3_ecc;
+    double a4 = DATA.a4_ecc;
+    double a5 = DATA.a5_ecc;
+    double a6 = DATA.a6_ecc;
+    double a7 = DATA.a7_ecc;
+		double ecc[nharmonics] = {a1,a2,a3,a4,a5,a6,a7};
 		double psi[nharmonics] = {0,0,0,0,0,0,0};
 		double r2 = x*x+y*y;
 		double stretch = 1.0;
 		for(int n = 1; n <= nharmonics; n++) {
 			stretch += ecc[n-1]*cos(n*phi - n*psi[n-1]);
 		}
-		double epsilon = 50*exp(-r2*stretch/(2*Rgauss*Rgauss));
+		double epsilon = 50.0*exp(-r2*stretch/(2*Rgauss*Rgauss));
 		epsilon = max(epsilon, 1e-11);
             	arena_current(ix, iy, ieta).epsilon = epsilon;
 //            	arena_current(ix, iy, ieta).rhob = 0.0;
@@ -1094,12 +1205,12 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 		for(int j=0; j < zmax; j++) {
 		    for(int k=0; k < zmax; k++) {
 			complex<double> powz, powzbar;
-			if(abs(z) == 0.0) // pow() doesn't work nicely with a vanishing complex number 
+			if(abs(z) == 0.0) // pow() doesn't work nicely with a vanishing complex number
 			{
 			   powz = pow(0,j);
 			   powzbar = pow(0,k);
 			}
-			else 
+			else
 			{
 			   powz = pow(z,j);
 			   powzbar = pow(zbar,k);
@@ -1121,7 +1232,7 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 		}
 		epsU[j][k] /= eps[0][0];
 		epsUbar[j][k] /= eps[0][0];
-		of << j << "\t" << k << "\t" << eps[j][k] << "\t" 
+		of << j << "\t" << k << "\t" << eps[j][k] << "\t"
 		    << epsU[j][k] << "\t" << epsUbar[j][k] << "\t" << epsS[j][k] << endl;
 	    }
 	}
@@ -1133,6 +1244,11 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 	complex<double> W13 = eps[2][1] - eps[2][0]*eps[0][1]
 	    - 2.0*eps[1][1]*eps[1][0] + 2.0*eps[1][0]*eps[1][0]*eps[0][1];
 	complex<double> W33 = eps[3][0] + eps[1][0]*(3.0*eps[2][0] - 2.0*eps[1][0]*eps[1][0]);
+	complex<double> W44 = -(1.0/24.0)*(pow(W11,4)+12.0*pow(W11,2)*W22+12.0*pow(W22,2)+24.0*W11*W33-24.0*eps[4][0]);
+  //complex<double> W55 = eps[5][0]+20.0*eps[3][0]*eps[1][0]*eps[1][0]-60.0*eps[2][0]*eps[1][0]*eps[1][0]*eps[1][0]+5.0*(6.0*eps[2][0]*eps[2][0]-eps[4][0])*eps[1][0]-10.0*eps[2][0]*eps[3][0]+24.0*eps[1][0]*eps[1][0]*eps[1][0]*eps[1][0]*eps[1][0];
+
+ complex<double> W55 = -(1.0/12.0)*(pow(W11,5)+20.0*pow(W11,3)*W22+60.0*(W11*pow(W22,2)+pow(W11,2)*W33)+120.0*W22*W33+120.0*W11*W44-120.0*eps[5][0]);
+
 	complex<double> SW11 = epsS[1][0];
 	complex<double> SW02 = epsS[1][1] - epsS[1][0]*eps[0][1];
 	complex<double> SW22 = epsS[2][0] - SW11*SW11;
@@ -1140,11 +1256,23 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 	    - 2.0*epsS[1][1]*epsS[1][0] + 2.0*epsS[1][0]*epsS[1][0]*epsS[0][1];
 	complex<double> SW33 = epsS[3][0] + epsS[1][0]*(3.0*epsS[2][0] - 2.0*epsS[1][0]*epsS[1][0]);
 	cout << "W11 = " << W11 << endl;
-	cout << "eps2 = " << -W22/W02 << endl;
-	cout << "eps3 = " << -W33/pow(W02,1.5) << endl;
-	cout << "eps1 = " << -W13/pow(W02,1.5) << endl;
+	cout << "eps2 = " << abs(-W22/W02) << endl;
+	cout << "shear= " << DATA.shear_to_s << endl;
+ofstream outfile4;
+outfile4.open("excE.dat",ios::out|ios::app);
+outfile4 << "#eps2      eps3      eps4      eps5      eps6      eps7\n";
+outfile4<<" " << abs(-W22/W02) << " " << abs(-W33/pow(W02,1.5)) <<
+" " << abs(-eps[4][0]/eps[2][2]) << " " << abs(-W55/pow(W02,2.5)) << " " << abs(-eps[6][0]/eps[3][3])
+<< " " << abs(-eps[7][0]/pow(W02,3.5)) << endl;
+outfile4.close();
+	cout << "eps3 = " << abs(-W33/pow(W02,1.5)) << endl;
+	cout << "eps1 = " << abs(-W13/pow(W02,1.5)) << endl;
 	cout << "Using entropy as weight instead of energy density:\n";
-	cout << "eps2S = " << -SW22/SW02 << endl;
+	cout << "eps2S = " << abs(-SW22/SW02) << endl;
+ofstream outfile3;
+outfile3.open("excS.dat",ios::out|ios::app);
+outfile3<<" " << abs(-SW22/SW02) << " " << arg(-SW22/SW02) <<endl;
+outfile3.close();
 	cout << "eps3S = " << -SW33/pow(SW02,1.5) << endl;
 	cout << "eps1S = " << -SW13/pow(SW02,1.5) << endl;
 // calculate <r^3> and <r^5> in centered coordinates
@@ -1180,6 +1308,7 @@ void Init::output_2D_eccentricities(int ieta, SCGrid &arena) {
 	cout << "<r^3> = " << den3 << endl;
 	cout << "<r^4> = " << den4 << endl;
 	cout << "<r^5> = " << den5 << endl;
-	cout << "Alternate eps3 = " << -W33/den3 << endl;
+	cout << "Alternate eps3 = " << abs(-W33/den3) << endl;
+  cout << "Alternate eps2 = " << abs(-W22/den2) << endl;
 //	cout << "Alternate eps5 = " << -W55/den5 << endl;
     }

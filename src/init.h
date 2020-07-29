@@ -28,7 +28,7 @@ class Init {
                    SCGrid &arena_future);
     void InitTJb  (SCGrid &arena_prev, SCGrid &arena_current);
 
-    void initial_trento_XY               (int ieta, SCGrid &arena_prev, SCGrid &arena_current); 
+    void initial_trento_XY               (int ieta, SCGrid &arena_prev, SCGrid &arena_current);
     void initial_Gubser_XY               (int ieta, SCGrid &arena_prev, SCGrid &arena_current);
     void initial_1p1D_eta                (SCGrid &arena_prev, SCGrid &arena_current);
     void initial_IPGlasma_XY             (int ieta, SCGrid &arena_prev, SCGrid &arena_current);
@@ -36,9 +36,10 @@ class Init {
     void initial_MCGlb_with_rhob_XY      (int ieta, SCGrid &arena_prev, SCGrid &arena_current);
     void initial_MCGlbLEXUS_with_rhob_XY (int ieta, SCGrid &arena_prev, SCGrid &arena_current);
     void initial_distorted_Gaussian (SCGrid &arena_prev, SCGrid &arena_current);
+    void initial_distorted_Wood_Saxon (SCGrid &arena_prev, SCGrid &arena_current);
     void initial_AMPT_XY                 (int ieta, SCGrid &arena_prev, SCGrid &arena_current);
     void initial_UMN_with_rhob           (SCGrid &arena_prev, SCGrid & arena_current);
-    
+
     double eta_profile_normalisation       (double eta);
     double eta_rhob_profile_normalisation  (double eta);
     double eta_profile_left_factor         (double eta);
@@ -47,6 +48,7 @@ class Init {
     double eta_rhob_right_factor           (double eta);
     void   output_initial_density_profiles (SCGrid &arena);
     void   output_2D_eccentricities (int ieta, SCGrid &arena);
+    void   saida ();
 };
 
 #endif  // SRC_INIT_H_

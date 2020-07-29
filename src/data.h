@@ -101,9 +101,12 @@ typedef struct init_data {
     int turn_on_bulk;       //!< flag to include bulk viscosity
     int turn_on_diff;       //!< flag to include net baryon diffusion
     double shear_to_s;      //!< value of specific shear viscosity
+  //  double bulk_to_s;        // value of specific bulk viscosity
 
     //! flag to include temperature dependent eta/s(T)
     int T_dependent_shear_to_s;
+
+    int T_dependent_bulk_to_s;
 
     //! flag to include second order non-linear coupling terms
     int include_second_order_terms;
@@ -192,6 +195,19 @@ typedef struct init_data {
     // tolerances for copying spectra from already-calculated particles with similar mass and chemical potential
     double MassTolerance;
     double MuTolerance;
+    double a1_ecc;
+    double a2_ecc;
+    double a3_ecc;
+    double a4_ecc;
+    double a5_ecc;
+    double a6_ecc;
+    double a7_ecc;
+    double norm_ecc;
+    double rho0; //energy constant of glauber model
+  double exc2;
+  double exc3;
+  double exc4;
+  double exc5;
 
 } InitData;
 

@@ -46,7 +46,7 @@ EOS::~EOS() {
 
 
 void EOS::initialize_eos() {
-    if (parameters_ptr.Initial_profile == 0) {
+    if (parameters_ptr.whichEOS == 0) {
         music_message.info("Using the ideal gas EOS");
         number_of_tables = 0;
     } else if (parameters_ptr.whichEOS == 1) {
@@ -121,14 +121,14 @@ void EOS::initialize_eos() {
 
 
 void EOS::init_eos() {
-// read the azhydro pressure, temperature, and 
+// read the azhydro pressure, temperature, and
 // baryon chemical potential from file
     whichEOS = 1;
     music_message.info("reading EOS...");
     auto envPath = get_hydro_env_path();
     music_message << "from path " << envPath.c_str() << "/EOS";
     music_message.flush("info");
-    
+
     number_of_tables = 2;
     resize_table_info_arrays();
 
@@ -143,7 +143,7 @@ void EOS::init_eos() {
                             + eos_file_string_array[itable] + "_t.dat");
         std::ifstream eos_mub(envPath + "/EOS/EOS-Q/aa"
                               + eos_file_string_array[itable] + "_mb.dat");
-  
+
         // read the first two lines:
         // first value of rhob, first value of epsilon
         // deltaRhob, deltaEpsilon, number of rhob steps, number of epsilon steps
@@ -160,7 +160,7 @@ void EOS::init_eos() {
         std::getline(eos_T, dummy);
         std::getline(eos_mub, dummy);
         std::getline(eos_mub, dummy);
- 
+
         // allocate memory for pressure arrays
         pressure_tb[itable] = Util::mtx_malloc(nb_length[itable],
                                                e_length[itable]);
@@ -183,7 +183,7 @@ void EOS::init_eos() {
 
 
 void EOS::init_eos_s95p(int selector) {
-    // read the lattice EOS pressure, temperature, and 
+    // read the lattice EOS pressure, temperature, and
     // baryon chemical potential from file
     music_message.info("reading EOS s95p ...");
 
@@ -203,7 +203,7 @@ void EOS::init_eos_s95p(int selector) {
     } else if (selector == 5) {
         spath << "/EOS/s95p-v1.2/";
     }
-    
+
     music_message << "from path " << spath.str();
     music_message.flush("info");
 
@@ -212,10 +212,10 @@ void EOS::init_eos_s95p(int selector) {
     } else if (selector == 5) {
         spath << "s95p-v1.2_";
     }
-    
+
     number_of_tables = 7;
     resize_table_info_arrays();
-    
+
     string eos_file_string_array[7] = {"1", "2", "3", "4", "5", "6", "7"};
     pressure_tb    = new double** [number_of_tables];
     temperature_tb = new double** [number_of_tables];
@@ -229,15 +229,15 @@ void EOS::init_eos_s95p(int selector) {
         // deltaEpsilon, number of epsilon steps (i.e. # of lines)
         eos_d >> e_bounds[itable];
         eos_d >> e_spacing[itable] >> e_length[itable];
-        
+
         // skip the header in T file
         string dummy;
         std::getline(eos_T, dummy);
         std::getline(eos_T, dummy);
-        
+
         // no rho_b dependence at the moment
         nb_length[itable] = 1;
-        
+
         // allocate memory for pressure arrays
         pressure_tb[itable] = Util::mtx_malloc(nb_length[itable],
                                                e_length[itable]);
@@ -270,7 +270,7 @@ void EOS::init_eos10() {
     string path = slocalpath.str();
     music_message << "from path " << path;
     music_message.flush("info");
-    
+
     number_of_tables = 7;
     resize_table_info_arrays();
 
@@ -337,16 +337,16 @@ void EOS::init_eos11() {
 
     music_message << "from path " << path;
     music_message.flush("info");
-    
+
     number_of_tables = 4;
     resize_table_info_arrays();
-    
+
     string eos_file_string_array[4] = {"1", "2", "3", "4"};
     pressure_tb    = new double** [number_of_tables];
     temperature_tb = new double** [number_of_tables];
     mu_B_tb        = new double** [number_of_tables];
     mu_S_tb        = new double** [number_of_tables];
-    
+
     for (int itable = 0; itable < number_of_tables; itable++) {
         ifstream eos_p(path + "p" + eos_file_string_array[itable] + ".dat");
         ifstream eos_T(path + "t" + eos_file_string_array[itable] + ".dat");
@@ -402,14 +402,14 @@ void EOS::init_eos12() {
     // read the lattice EOS at finite muB
     // pressure, temperature, and baryon chemical potential from file
     music_message.info("reading EOS ...");
-    
+
     stringstream slocalpath;
     slocalpath << "./EOS/neos_3/";
 
     string path = slocalpath.str();
     music_message << "from path " << path;
     music_message.flush("info");
-    
+
     number_of_tables = 7;
     resize_table_info_arrays();
 
@@ -437,14 +437,14 @@ void EOS::init_eos12() {
               >> N_rhob >> N_e;
         nb_length[itable] = N_rhob + 1;
         e_length[itable]  = N_e + 1;
-        
+
         // skip the header in T and mu_B files
         string dummy;
         std::getline(eos_T, dummy);
         std::getline(eos_T, dummy);
         std::getline(eos_muB, dummy);
         std::getline(eos_muB, dummy);
-        
+
         // allocate memory for EOS arrays
         pressure_tb[itable] = Util::mtx_malloc(nb_length[itable],
                                                e_length[itable]);
@@ -472,7 +472,7 @@ double EOS::get_dpOverde3(double e, double rhob) const {
 
    double pL = get_pressure(eLeft, rhob);   // 1/fm^4
    double pR = get_pressure(eRight, rhob);  // 1/fm^4
-      
+
    double dpde = (pR - pL)/(eRight - eLeft);
    return dpde;
 }
@@ -482,13 +482,13 @@ double EOS::get_dpOverdrhob2(double e, double rhob) const {
     int table_idx = get_table_idx(e);
     double deltaRhob = nb_spacing[table_idx];
     //double rhob_max = nb_bounds[table_idx] + nb_length[table_idx]*deltaRhob;
-    
+
     double rhobLeft  = rhob - deltaRhob*0.5;
     double rhobRight = rhob + deltaRhob*0.5;
 
     double pL = get_pressure(e, rhobLeft);      // 1/fm^4
     double pR = get_pressure(e, rhobRight);     // 1/fm^4
-      
+
     double dpdrho = (pR - pL)/(rhobRight - rhobLeft);  // 1/fm
     return (dpdrho);   // in 1/fm
 }
@@ -527,7 +527,7 @@ double EOS::calculate_velocity_of_sound_sq(double e, double rhob) const {
     return(v_sound);
 }
 
-    
+
 //! This function returns the local pressure in [1/fm^4]
 //! the input local energy density [1/fm^4], rhob [1/fm^3]
 double EOS::get_pressure(double e, double rhob) const {
@@ -623,7 +623,7 @@ double EOS::get_pressure_WB(double e_local) const {
     double e10 = e9*e_local;
     double e11 = e10*e_local;
     double e12 = e11*e_local;
-	
+
 	p = ((  1.9531729608963267e-11*e12 + 3.1188455176941583e-7*e11
           + 0.0009417586777847889*e10 + 0.7158279081255019*e9
           + 141.5073484468774*e8 + 6340.448389300905*e7
@@ -879,7 +879,7 @@ double EOS::get_s2e_finite_rhob(double s, double rhob) const {
         s_mid = get_entropy(eps_mid, rhob);
         if (s < s_mid)
             eps_upper = eps_mid;
-        else 
+        else
             eps_lower = eps_mid;
         eps_mid = (eps_upper + eps_lower)/2.;
         iter++;
@@ -912,8 +912,8 @@ double EOS::get_rhob_from_mub(double e, double mub) const {
 
     // compute the indices
     int idx_e = static_cast<int>((local_ed - eps0)/deltaEps);
-    double frac_e = (local_ed - (idx_e*deltaEps + eps0))/deltaEps; 
-    
+    double frac_e = (local_ed - (idx_e*deltaEps + eps0))/deltaEps;
+
     // check overflow and underflow
     idx_e = std::max(0, std::min(NEps - 2, idx_e));
 
@@ -978,7 +978,7 @@ void EOS::check_eos_no_muB() const {
         double T_local = get_temperature(e_local, 0.0);
         double cs2_local = get_cs2(e_local, 0.0);
         check_file << scientific << setw(18) << setprecision(8)
-                   << e_local*hbarc << "   " << p_local*hbarc << "   " 
+                   << e_local*hbarc << "   " << p_local*hbarc << "   "
                    << s_local << "   " << T_local*hbarc << "   "
                    << cs2_local << endl;
     }
@@ -1008,7 +1008,7 @@ void EOS::check_eos_with_finite_muB() const {
             double mu_b_local = get_mu(e_local, rhob_local);
             double mu_s_local = get_muS(e_local, rhob_local);
             check_file << scientific << setw(18) << setprecision(8)
-                       << e_local*hbarc << "   " << p_local*hbarc << "   " 
+                       << e_local*hbarc << "   " << p_local*hbarc << "   "
                        << s_local << "   " << T_local*hbarc << "   "
                        << cs2_local << "   " << mu_b_local*hbarc << "   "
                        << mu_s_local*hbarc << endl;
@@ -1039,7 +1039,7 @@ void EOS::check_eos_with_finite_muB() const {
             double mu_b_local = get_mu(e_local, rhob_local);
             double mu_s_local = get_muS(e_local, rhob_local);
             check_file << scientific << setw(18) << setprecision(8)
-                       << rhob_local << "   " << p_local*hbarc << "   " 
+                       << rhob_local << "   " << p_local*hbarc << "   "
                        << s_local << "   " << T_local*hbarc << "   "
                        << cs2_local << "   " << mu_b_local*hbarc << "   "
                        << mu_s_local*hbarc << endl;
@@ -1081,7 +1081,7 @@ void EOS::check_eos_with_finite_muB() const {
                       "check_EoS_T_table1.dat");
     output_eos_matrix(e_length[0], nb_length[0], mu_B_tb[0],
                       "check_EoS_muB_table1.dat");
-    
+
     double sovernB[] = {10.0, 20.0, 30.0, 51.0, 70.0, 94.0, 144.0, 420.0};
     int array_length = sizeof(sovernB)/sizeof(double);
     double s_0 = 0.00;         // 1/fm^3
@@ -1106,7 +1106,7 @@ void EOS::check_eos_with_finite_muB() const {
             double mu_B        = get_mu(e_local, nB_local)*hbarc;
             check_file9 << scientific << setw(18) << setprecision(8)
                         << e_local*hbarc << "  " << temperature << "  "
-                        << cs2_local << "  " << mu_B << "  " 
+                        << cs2_local << "  " << mu_B << "  "
                         << s_check << "  " << nB_local << "  "
                         << dpde << "  " << dpdrho << endl;
         }

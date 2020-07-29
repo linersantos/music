@@ -1,0 +1,8 @@
+#!/bin/bash
+./compile
+rm -rf testando
+mkdir testando
+cd testando
+cp $HYDROPROGRAMPATH/insample insample
+$HYDROPROGRAMPATH/./mpihydro insample
+cd ../

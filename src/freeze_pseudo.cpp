@@ -36,12 +36,13 @@ void Freeze::ReadSpectra_pseudo(InitData* DATA, int full, int verbose) {
     int count;
     count = 0;
     if (verbose) {
+      cout << " "<<ietamax;
         music_message << "NumberOfParticlesToInclude "
                       << DATA->NumberOfParticlesToInclude;
         music_message.flush("info");
     }
     // read particle information:
-    while (fscanf(p_file,"%d %lf %d %lf %lf %d %d ",
+    while (fscanf(p_file,"%d %lg %d %lg %lg %d %d ",
                   &number, &etamax, &ietamax, &ptmin, &ptmax,
                   &iptmax, &iphimax) == 7) {
         count++;
@@ -70,7 +71,7 @@ void Freeze::ReadSpectra_pseudo(InitData* DATA, int full, int verbose) {
         for (int ieta = 0; ieta <= pseudo_steps; ieta++) {
             particleList[ip].y[ieta] = ieta*deltaeta - etamax;
         }
-    
+
     }
     particleMax = ip + 1;
 
@@ -83,7 +84,7 @@ void Freeze::ReadSpectra_pseudo(InitData* DATA, int full, int verbose) {
         s_file = fopen(sf_name.c_str(), "r");
     else
         s_file = fopen(s_name.c_str(), "r");
-  
+
     if (verbose) {
         music_message << "ietamax = " << pseudo_steps+1;
         music_message.flush("info");
@@ -146,22 +147,22 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
     int iphimax = DATA->phi_steps;  // number of points
                                     // (phi=2pi equal to phi=0)
     double deltaphi = 2*PI/iphimax;
-  
+
     // Reuse rapidity variables (Need to reuse variable y
     // so resonance decay routine can be used as is.
     // Might as well misuse ymax and deltaY too)
-    particleList[j].ymax = etamax; 
+    particleList[j].ymax = etamax;
     particleList[j].deltaY = deltaeta;
 
     music_message << "Doing " << j << ": "
                   << particleList[j].name << "("
                   << particleList[j].number << ") ... ";
     music_message.flush("info");
- 
+
     particleList[j].ny = DATA->pseudo_steps + 1;
     particleList[j].npt = iptmax;
     particleList[j].nphi = iphimax;
-  
+
     // set particle properties
     double m = particleList[j].mass;
     int deg = particleList[j].degeneracy;
@@ -180,7 +181,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
     FILE *d_file;
     char *buf = new char[10];
     sprintf (buf, "%d", 0);
-    
+
     char *specString=new char[30];
     strcpy(specString, "yptphiSpectra");
 //    strcat(specString, buf);
@@ -200,7 +201,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
             number,  etamax, DATA->pseudo_steps+1, ptmin, ptmax,
             iptmax, iphimax);
 
-    // caching 
+    // caching
     double* cos_phi = new double [iphimax];
     double* sin_phi = new double [iphimax];
     for (int iphi = 0; iphi < iphimax; iphi++) {
@@ -216,7 +217,8 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
         pt_array[ipt] = pt;
         particleList[j].pt[ipt] = pt;
     }
-    
+    cout<<"pt min= "<<particleList[j].pt[0]<<endl; //17/12/2018
+
     double *bulk_deltaf_coeffs = new double[3];
     if (DATA_ptr->turn_on_bulk == 1 && DATA_ptr->include_deltaf_bulk == 1) {
         if (bulk_deltaf_kind == 0) {
@@ -225,7 +227,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
             bulk_deltaf_coeffs = new double[2];
         }
     }
-      
+
     double alpha = 0.0;
     // main loop begins ...
     // store E dN/d^3p as function of phi,
@@ -333,7 +335,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
                     Pi_bulk = surface[icell].pi_b;
                     getbulkvisCoefficients(T, bulk_deltaf_coeffs);
                 }
-                
+
                 double qmu_0 = 0.0;
                 double qmu_1 = 0.0;
                 double qmu_2 = 0.0;
@@ -363,7 +365,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
                 }
 
                 double eps_plus_P_over_T = surface[icell].eps_plus_p_over_T_FO;
-                double prefactor_shear = 1./(2.*eps_plus_P_over_T*T*T*T)*hbarc; 
+                double prefactor_shear = 1./(2.*eps_plus_P_over_T*T*T*T)*hbarc;
                                                                 // fm^4/GeV^2
                 double prefactor_qmu = rhoB/(eps_plus_P_over_T*T);   // 1/GeV
 
@@ -375,13 +377,13 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
                         double sinh_y_local = sinh_y[ipt];
                         double mt = sqrt(m*m + pt*pt);     // all in GeV
                         double ptau = mt*(cosh_y_local*cosh_eta_s
-                                          - sinh_y_local*sinh_eta_s); 
+                                          - sinh_y_local*sinh_eta_s);
                         double peta = mt*(sinh_y_local*cosh_eta_s
-                                          - cosh_y_local*sinh_eta_s); 
+                                          - cosh_y_local*sinh_eta_s);
                         for (int iphi = 0; iphi < iphimax; iphi++) {
                             double px = pt*cos_phi[iphi];
                             double py = pt*sin_phi[iphi];
-                  
+
                             double sum;
                             // compute p^mu*dSigma_mu [fm^3*GeV]
                             double pdSigma = tau*(ptau*sigma_mu[0]
@@ -392,9 +394,9 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
                                         - py*u_flow[2] - peta*u_flow[3]);
                             // this is the equilibrium f, f_0:
                             double f = 1./(exp(1./T*(E - mu)) + sign);
-                     
+
                             // now comes the delta_f: check if still correct
-                            // at finite mu_b 
+                            // at finite mu_b
                             // we assume here the same C=eta/s for
                             // all particle species because
                             // it is the simplest way to do it.
@@ -416,7 +418,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
                                     // to p^(2-alpha):
                                     delta_f_shear = (delta_f_shear
                                                      *pow((T/E), 1.*alpha)
-                                                     *120./(tgamma(6.-alpha))); 
+                                                     *120./(tgamma(6.-alpha)));
                                 }
                             }
                             double delta_f_bulk = 0.0;
@@ -460,7 +462,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
                                             *Pi_bulk);
                                 }
                             }
-                            
+
                             // delta f for qmu
                             double qmufactor = 0.0;
                             double delta_f_qmu = 0.0;
@@ -491,13 +493,13 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
                                 total_deltaf *= f/fabs(total_deltaf);
                             }
                             sum = (f + total_deltaf)*pdSigma;
-                     
+
                             if (sum > 10000) {
                                 music_message << "sum>10000 in summation. sum = "
-                                     << sum 
+                                     << sum
                                      << ", f=" << f << ", deltaf="
                                      << delta_f_shear
-                                     << ", pdSigma=" << pdSigma << ", T=" << T 
+                                     << ", pdSigma=" << pdSigma << ", T=" << T
                                      << ", E=" << E << ", mu=" << mu;
                                 music_message.flush("warning");
                             }
@@ -540,7 +542,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_improved(InitData *DATA,
             delete[] temp_sum[ipt];
         delete[] temp_sum;
     }
-    
+
     if (DATA_ptr->turn_on_bulk == 1 && DATA_ptr->include_deltaf_bulk == 1) {
         delete[] bulk_deltaf_coeffs;
     }
@@ -574,22 +576,22 @@ void Freeze::ComputeParticleSpectrum_pseudo_boost_invariant(
     int iphimax = DATA->phi_steps;  // number of points
                                     // (phi=2pi equal to phi=0)
     double deltaphi = 2*PI/iphimax;
-  
+
     // Reuse rapidity variables (Need to reuse variable y
     // so resonance decay routine can be used as is.
     // Might as well misuse ymax and deltaY too)
-    particleList[j].ymax = etamax; 
+    particleList[j].ymax = etamax;
     particleList[j].deltaY = deltaeta;
 
     music_message << "Doing " << j << ": "
                   << particleList[j].name << "("
                   << particleList[j].number << ") ...";
     music_message.flush("info");
- 
+
     particleList[j].ny = DATA->pseudo_steps + 1;
     particleList[j].npt = iptmax;
     particleList[j].nphi = iphimax;
-  
+
     // set particle properties
     double m = particleList[j].mass;
     int deg = particleList[j].degeneracy;
@@ -619,7 +621,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_boost_invariant(
     fprintf(d_file, "%d %e %d %e %e %d %d \n",
             number,  etamax, DATA->pseudo_steps+1, ptmin, ptmax,
             iptmax, iphimax);
-    // caching 
+    // caching
     double *cos_phi = new double[iphimax];
     double *sin_phi = new double[iphimax];
     for (int iphi = 0; iphi < iphimax; iphi++) {
@@ -635,7 +637,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_boost_invariant(
         pt_array[ipt] = pt;
         particleList[j].pt[ipt] = pt;
     }
-    
+
     double *bulk_deltaf_coeffs = new double[3];
     if (DATA_ptr->turn_on_bulk == 1 && DATA_ptr->include_deltaf_bulk == 1) {
         if (bulk_deltaf_kind == 0) {
@@ -644,7 +646,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_boost_invariant(
             bulk_deltaf_coeffs = new double[2];
         }
     }
-      
+
     double alpha = 0.0;
     double** temp_sum = new double* [iptmax];
     for (int ii = 0; ii < iptmax; ii++) {
@@ -653,7 +655,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_boost_invariant(
             temp_sum[ii][jj] = 0.0;
         }
     }
-    
+
     // main loop begins ...
     // store E dN/d^3p as function of phi,
     // pt and eta (pseudorapidity) in sumPtPhi:
@@ -665,7 +667,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_boost_invariant(
         // use critical clause at the end to add the private 2d arrays
         // together from individual omp_thread
         double temp_sum_private[iptmax][iphimax];
-        for (int ii = 0; ii < iptmax;  ii++) 
+        for (int ii = 0; ii < iptmax;  ii++)
         for (int jj = 0; jj < iphimax; jj++) {
             temp_sum_private[ii][jj] = 0.0;
         }
@@ -724,7 +726,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_boost_invariant(
             }
 
             double eps_plus_P_over_T = surface[icell].eps_plus_p_over_T_FO;
-            double prefactor_shear = 1./(2.*eps_plus_P_over_T*T*T*T)*hbarc; 
+            double prefactor_shear = 1./(2.*eps_plus_P_over_T*T*T*T)*hbarc;
                                                                 // fm^4/GeV^2
 
             for (int ieta_s = 0; ieta_s < n_eta_s_integral; ieta_s++) {
@@ -739,7 +741,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_boost_invariant(
                     for (int iphi = 0; iphi < iphimax; iphi++) {
                         double px = pt*cos_phi[iphi];
                         double py = pt*sin_phi[iphi];
-                  
+
                         double sum;
                         // compute p^mu*dSigma_mu [fm^3*GeV]
                         double pdSigma = tau*(ptau*sigma_mu[0]
@@ -750,9 +752,9 @@ void Freeze::ComputeParticleSpectrum_pseudo_boost_invariant(
                                     - py*u_flow[2]- peta*u_flow[3]);
                         // this is the equilibrium f, f_0:
                         double f = 1./(exp(1./T*(E - mu)) + sign);
-                    
+
                         // now comes the delta_f: check if still correct
-                        // at finite mu_b 
+                        // at finite mu_b
                         // we assume here the same C=eta/s for
                         // all particle species because
                         // it is the simplest way to do it.
@@ -774,7 +776,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_boost_invariant(
                                 // to p^(2-alpha):
                                 delta_f_shear = (delta_f_shear
                                                  *pow((T/E), 1.*alpha)
-                                                 *120./(tgamma(6.-alpha))); 
+                                                 *120./(tgamma(6.-alpha)));
                             }
                         }
                         double delta_f_bulk = 0.0;
@@ -824,12 +826,12 @@ void Freeze::ComputeParticleSpectrum_pseudo_boost_invariant(
                             total_deltaf *= f/fabs(total_deltaf);
                         }
                         sum = (f + total_deltaf)*pdSigma;
-                    
+
                         if (sum > 10000) {
                             music_message << "sum>10000 in summation. sum = "
-                                 << sum 
+                                 << sum
                                  << ", f=" << f << ", deltaf=" << delta_f_shear
-                                 << ", pdSigma=" << pdSigma << ", T=" << T 
+                                 << ", pdSigma=" << pdSigma << ", T=" << T
                                  << ", E=" << E << ", mu=" << mu;
                             music_message.flush("warning");
                         }
@@ -873,7 +875,7 @@ void Freeze::ComputeParticleSpectrum_pseudo_boost_invariant(
         delete[] temp_sum[ipt];
     }
     delete[] temp_sum;
-    
+
     if (DATA_ptr->turn_on_bulk == 1 && DATA_ptr->include_deltaf_bulk == 1) {
         delete [] bulk_deltaf_coeffs;
     }
@@ -891,13 +893,13 @@ void Freeze::OutputFullParticleSpectrum_pseudo(InitData *DATA, int number,
     FILE *d_file;
     const char* d_name = "FparticleInformation.dat";
     d_file = fopen(d_name, "a");
-  
+
     fprintf(d_file, "%d %e %d %e %e %d %d \n",
             number,  DATA->max_pseudorapidity, DATA->pseudo_steps+1,
             DATA->min_pt, DATA->max_pt, DATA->pt_steps+1, DATA->phi_steps);
 
     fclose(d_file);
-  
+
     FILE *s_file;
     const char* s_name = "FyptphiSpectra.dat";
     s_file = fopen(s_name, "a");
@@ -942,13 +944,13 @@ void Freeze::compute_thermal_spectra(int particleSpectrumNumber,
         for (int i = 1; i < particleMax_copy; i++) {
             int number = particleList[i].number;
             int computespectrum = 1;
-      
+
             // Only calculate particles with unique mass
             for(int part = 1; part < i; part++) {
                 double mass_diff = fabs(particleList[i].mass
                                         - particleList[part].mass)/particleList[i].mass;
                 double mu_diff = 0.0;
-		if(particleList[i].muAtFreezeOut != 0.0) 
+		if(particleList[i].muAtFreezeOut != 0.0)
 		    mu_diff = fabs(particleList[i].muAtFreezeOut
                                       - particleList[part].muAtFreezeOut)/particleList[i].muAtFreezeOut;
                 if (mass_diff < mass_tol && mu_diff < mu_tol
@@ -990,7 +992,7 @@ void Freeze::compute_thermal_spectra(int particleSpectrumNumber,
                     FILE *s_file;
                     const char* s_name = "yptphiSpectra.dat";
                     s_file = fopen(s_name, "a");
-                    particleList[i].ymax = particleList[part].ymax; 
+                    particleList[i].ymax = particleList[part].ymax;
                     particleList[i].deltaY = particleList[part].deltaY;
                     particleList[i].ny = particleList[part].ny;
                     particleList[i].npt = particleList[part].npt;
@@ -1003,7 +1005,7 @@ void Freeze::compute_thermal_spectra(int particleSpectrumNumber,
                             particleList[i].pt[ipt] =
                                             particleList[part].pt[ipt];
                             particleList[i].y[ieta] =
-                                            particleList[part].y[ieta];  
+                                            particleList[part].y[ieta];
                             for (int iphi = 0; iphi < iphimax; iphi++) {
                                 particleList[i].dNdydptdphi[ieta][ipt][iphi] =
                                     (degen_ratio
@@ -1019,7 +1021,7 @@ void Freeze::compute_thermal_spectra(int particleSpectrumNumber,
                     part = particleMax_copy; // break out of particle loop
                 }  // if particles have same mass
             }  // loop over particles that have already been calculated
-      
+
             if (computespectrum) {
                 if (boost_invariant) {
                     ComputeParticleSpectrum_pseudo_boost_invariant(
@@ -1048,7 +1050,7 @@ void Freeze::compute_thermal_spectra(int particleSpectrumNumber,
         } else {
             ComputeParticleSpectrum_pseudo_improved(DATA, number);
         }
-    
+
 //        system("cat yptphiSpectra?.dat >> yptphiSpectra.dat");
 //        system("cat yptphiSpectra??.dat >> yptphiSpectra.dat "
 //               "2> /dev/null");
@@ -1057,7 +1059,7 @@ void Freeze::compute_thermal_spectra(int particleSpectrumNumber,
 
 void Freeze::perform_resonance_decays(InitData *DATA) {
     ReadSpectra_pseudo(DATA, 0, 1);
-    int bound = 211; //number of lightest particle to calculate. 
+    int bound = 211; //number of lightest particle to calculate.
     music_message << "particleMax = " << particleMax;
     music_message.flush("info");
     music_message << "doing all from " << particleMax << ": "
@@ -1082,15 +1084,15 @@ void Freeze::compute_thermal_particle_spectra_and_vn(InitData* DATA) {
     // take tabulated spectra
     // and compute various observables and integrated quantities
     int status = mkdir("./outputs", 0755);
-    if (status != 0) {
-        music_message << "Can not create folder ./outputs ...";
-        music_message.flush("warning");
-    }
+  //  if (status != 0) {
+  //      music_message << "Can not create folder ./outputs ...";
+  //      music_message.flush("warning");
+  //  }
     ReadSpectra_pseudo(DATA, 0, 1);
 
     //Make sure the pion, kaon and proton spectra are available
     if (particleMax < 21) {
-        music_message << __func__ 
+        music_message << __func__
                       << ": cannot compute pion, kaon and proton observables, "
                       << "some of the spectra are not available.";
         music_message.flush("warning");
@@ -1113,12 +1115,12 @@ void Freeze::compute_final_particle_spectra_and_vn(InitData* DATA) {
     // take tabulated post-decay spectra and
     // compute various observables and integrated quantities
     int status = mkdir("./outputs", 0755);   // output results folder
-    if (status != 0) {
-        music_message << "Can not create folder ./outputs ...";
-        music_message.flush("warning");
-    }
+    //if (status != 0) {
+      //  music_message << "Can not create folder ./outputs ...";
+        //music_message.flush("warning");
+    //}
     ReadSpectra_pseudo(DATA, 1, 1);  // read in particle spectra information
-    
+
     if (DATA->NumberOfParticlesToInclude > 200) {
         if ((DATA-> whichEOS != 7 && particleMax < 320)
                 || ((DATA->whichEOS == 7) && particleMax < 327)) {
@@ -1127,23 +1129,34 @@ void Freeze::compute_final_particle_spectra_and_vn(InitData* DATA) {
             music_message.flush("warning");
         }
         // calculate spectra and vn for charged hadrons
-        Output_charged_hadrons_eta_differential_spectra(DATA, 1, 0.01, 3.0);
-        Output_charged_hadrons_pT_differential_spectra(DATA, 1, -0.5, 0.5);
-        Output_charged_IntegratedFlow(DATA, 0.01, 3.0, -0.5, 0.5);
+	//CMS
+        Output_charged_hadrons_eta_differential_spectra(DATA, 1, 0.3, 3.0);
+        Output_charged_hadrons_pT_differential_spectra(DATA, 1, -2.5, 2.5);
+        Output_charged_IntegratedFlow(DATA, 0.3, 3.0, -2.5, 2.5);
+	//ATLAS
+	//Output_charged_hadrons_eta_differential_spectra(DATA, 1, 0.5, 5.0);//26/11/2019
+	Output_charged_hadrons_eta_differential_spectra(DATA, 1, 0.5, 3.0);
+        Output_charged_hadrons_pT_differential_spectra(DATA, 1, -2.5, 2.5);
+        //Output_charged_IntegratedFlow(DATA, 0.5, 5.0, -2.5, 2.5);
+        Output_charged_IntegratedFlow(DATA, 0.5, 3.0, -2.5, 2.5);
+	//ALICE
+	Output_charged_hadrons_eta_differential_spectra(DATA, 1, 0.2, 3.0);
+        Output_charged_hadrons_pT_differential_spectra(DATA, 1, -0.8, 0.8);
+        Output_charged_IntegratedFlow(DATA, 0.2, 3.0, -0.8, 0.8);
         // for PHENIX pT cut
-        Output_charged_IntegratedFlow(DATA, 0.15, 3.0, -0.5, 0.5);
+        //Output_charged_IntegratedFlow(DATA, 0.3, 3.0, -2.5, 2.5);
         // for ALICE or STAR pT cut
-        Output_charged_IntegratedFlow(DATA, 0.2, 3.0, -0.5, 0.5);
+        //Output_charged_IntegratedFlow(DATA, 0.3, 3.0, -2.5, 2.5);
         // for CMS pT cut
-        Output_charged_IntegratedFlow(DATA, 0.3, 3.0, -0.5, 0.5);
+        //Output_charged_IntegratedFlow(DATA, 0.3, 3.0, -2.5, 2.5);
 
-        Output_charged_IntegratedFlow(DATA, 0.4, 3.0, -0.5, 0.5);
+        //Output_charged_IntegratedFlow(DATA, 0.3, 3.0, -2.5, 2.5);
         // for ATLAS pT cut
-        Output_charged_IntegratedFlow(DATA, 0.5, 3.0, -0.5, 0.5);
+        //Output_charged_IntegratedFlow(DATA, 0.3, 3.0, -2.5, 2.5);
     }
 
     if (particleMax < 21) {
-        music_message << __func__ 
+        music_message << __func__
                       << "cannot compute pion, kaon and proton observables, "
                       << "some of the spectra are not available.";
         music_message.flush("warning");
@@ -1175,14 +1188,33 @@ void Freeze::CooperFrye_pseudo(int particleSpectrumNumber, int mode,
     }
     if (mode==13 || mode == 3 || mode == 1) {
         compute_thermal_particle_spectra_and_vn(DATA);
+
+        double *vn_temp = new double [2];
+       	double pT_min = 0.3;
+       	double pT_max = 3.0;
+       	double eta_min = 0.0;
+       	double eta_max = 0.0;
+        get_vn(DATA, 211,pT_min, pT_max, 0, eta_min, eta_max, 2);
 //        get_vn(DATA, pT_min, pT_max, 0, eta_min, eta_max, iorder, vn_temp);
 //        double *vn_temp = new double [2];
 //	double pT_min = 0.1;
 //	double pT_max = 3.0;
 //	double eta_min = 0.0;
 //	double eta_max = 0.0;
-//        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 2, vn_temp);
-//	cout << "v2 = " << sqrt(vn_temp[0]*vn_temp[0] + vn_temp[1]*vn_temp[1]) << endl;
+//outfile4.open("excE.dat",ios::out|ios::app);
+//outfile4<<" " << abs(-W22/W02) << " " << arg(-W22/W02) <<endl;
+//outfile4.close();
+        //get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 2, vn_temp);
+        ofstream outfilevnch1;
+
+        outfilevnch1.open("vn.dat",ios::out|ios::app);
+        outfilevnch1 << "#v1     v2      v3      v4      v5      v6      v7\n";
+        for(int n=1;n<=7;n++){
+        outfilevnch1<<" " << get_vn(DATA, 211,pT_min, pT_max, 0, eta_min, eta_max, n);
+      }
+      outfilevnch1 << endl;
+        outfilevnch1.close();
+	cout << "v2 = " <<  get_vn(DATA, 211,pT_min, pT_max, 0, eta_min, eta_max, 2) << endl;
 //        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 3, vn_temp);
 //	cout << "v3 = " << sqrt(vn_temp[0]*vn_temp[0] + vn_temp[1]*vn_temp[1]) << endl;
 //        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 4, vn_temp);
@@ -1193,19 +1225,24 @@ void Freeze::CooperFrye_pseudo(int particleSpectrumNumber, int mode,
 //	cout << "v6 = " << sqrt(vn_temp[0]*vn_temp[0] + vn_temp[1]*vn_temp[1]) << endl;
 //        get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, 7, vn_temp);
 //	cout << "v7 = " << sqrt(vn_temp[0]*vn_temp[0] + vn_temp[1]*vn_temp[1]) << endl;
-    } 
+    }
+  //  if(DATA->NumberOfParticlesToInclude > 2){
     if (mode==4 || mode==1) { //  do resonance decays
         perform_resonance_decays(DATA);
-    } 
+    }
     if (mode==14 || mode == 4 || mode == 1) {
 	cout << "After resonance decay:\n";
-//        double *vn_tempF = new double [2];
-//	double pT_minF = 0.1;
-//	double pT_maxF = 3.0;
-//	double eta_minF = 0.0;
-//	double eta_maxF = 0.0;
-//        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 2, vn_tempF);
-//	cout << "v2 = " << sqrt(vn_tempF[0]*vn_tempF[0] + vn_tempF[1]*vn_tempF[1]) << endl;
+        //double *vn_tempF = new double [2];
+//double pT_minF = 0.3;
+//double pT_maxF = 3.0;
+//double eta_minF = -2.5;
+//double eta_maxF = 2.5;
+  //      get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 2, vn_tempF);
+      //  ofstream outfilevnch2;
+        //outfilevnch2.open("vnch_2.dat",ios::out|ios::app);
+        //outfilevnch2<<" " << get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 2, vn_tempF) << endl;
+        //outfilevnch2.close();
+	//cout << "v2 = " << sqrt(vn_tempF[0]*vn_tempF[0] + vn_tempF[1]*vn_tempF[1]) << endl;
 //        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 3, vn_tempF);
 //	cout << "v3 = " << sqrt(vn_tempF[0]*vn_tempF[0] + vn_tempF[1]*vn_tempF[1]) << endl;
 //        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 4, vn_tempF);
@@ -1217,8 +1254,8 @@ void Freeze::CooperFrye_pseudo(int particleSpectrumNumber, int mode,
 //        get_vn_ch(DATA, pT_minF, pT_maxF, 0, eta_minF, eta_maxF, 7, vn_tempF);
 //	cout << "v7 = " << sqrt(vn_tempF[0]*vn_tempF[0] + vn_tempF[1]*vn_tempF[1]) << endl;
         compute_final_particle_spectra_and_vn(DATA);
-    } 
-
+    }
+//}
     // clean up
     delete[] partid;
     free(particleList);
@@ -1251,7 +1288,7 @@ double Freeze::dydeta(double eta, double pt, double m) {
 // yflag = 0 takes minrap and maxrap as a range in psuedorapidity,
 // while yflag = 1 uses rapidity
 // Yield (n=0) is dN/dpt/dy or dN/dpt/deta for minrap==maxrap,
-// or dN/dpt otherwise 
+// or dN/dpt otherwise
 void Freeze::rapidity_integrated_flow(
         InitData *DATA, int number, int yflag, double minrap, double maxrap,
         double vn[nharmonics][2][etasize]) {
@@ -1261,7 +1298,7 @@ void Freeze::rapidity_integrated_flow(
     int neta = particleList[j].ny;
     double intvn[ptsize][nharmonics][2] = {};
     double m = particleList[j].mass;
-   
+
     double testmin;
     if (yflag) {
         if (DATA->pseudofreeze == 1)
@@ -1297,7 +1334,7 @@ void Freeze::rapidity_integrated_flow(
             testmax = Rap(particleList[j].y[neta-1], particleList[j].pt[0], m);
     }
     if (maxrap > testmax) {
-        music_message << "Error: called out of range rapidity in rap_integrated_flow, "
+      music_message << "Error: called out of range rapidity in rap_integrated_flow, "
              << maxrap << " > maximum " << testmax;
         music_message.flush("error");
         exit(1);
@@ -1308,16 +1345,16 @@ void Freeze::rapidity_integrated_flow(
         music_message.flush("error");
         exit(1);
     }
-   
+
     // loop over pt
     for (int ipt = 0; ipt < npt; ipt++) {
         double pt = particleList[j].pt[ipt];
-     
+
         // Integrate over phi using trapezoid rule
         for (int iphi = 0; iphi < nphi; iphi++) {
             double ylist[etasize] = {0};
             double etalist[etasize] = {0};
-           
+
             // Integrate over pseudorapidity using gsl
             double dndpt[etasize] = {0};
             for (int ieta = 0; ieta < neta; ieta++) {
@@ -1356,7 +1393,7 @@ void Freeze::rapidity_integrated_flow(
                 // pseudo-rapidity
                 gsl_spline_init (spline, etalist, dndpt , neta);
             }
-   
+
             double dNdp;
             if (minrap < maxrap) {
                 // integrated from minrap to maxrap
@@ -1365,7 +1402,7 @@ void Freeze::rapidity_integrated_flow(
                 // value at minrap = maxrap
                 dNdp = gsl_spline_eval(spline, maxrap, acc);
             }
-           
+
             double phi = iphi*2*PI/nphi;
             for (int i = 0; i < nharmonics; i++) {
                 intvn[ipt][i][0] += cos(i*phi)*dNdp*2*PI/nphi;
@@ -1374,11 +1411,11 @@ void Freeze::rapidity_integrated_flow(
             gsl_spline_free (spline);
             gsl_interp_accel_free (acc);
         }  // phi loop
-   
+
         for (int k = 0; k < 2; k++) {
              vn[0][k][ipt] = intvn[ipt][0][k];
         }
-        
+
         for (int i = 1; i < nharmonics; i++) {
              for(int k = 0; k < 2; k++) {
                  vn[i][k][ipt] = intvn[ipt][i][k]/intvn[ipt][0][0];
@@ -1397,19 +1434,21 @@ void Freeze::pt_and_rapidity_integrated_flow(InitData *DATA, int number,
         double minpt, double maxpt, int yflag,  double minrap, double maxrap,
         double vn[nharmonics][2]) {
     int j = partid[MHALF+number];
-    int npt = particleList[j].npt;  
-    
+    int npt = particleList[j].npt;
+    //music_message << " "<<j;
     if (minpt < particleList[j].pt[0]) {
         music_message << "Error: called out of range pt in "
-             << "pt_and_rapidity_integrated_flow, " 
+             << "pt_and_rapidity_integrated_flow, "
              << minpt << " < minimum " << particleList[j].pt[0];
         music_message.flush("error");
         exit(1);
     }
     if (maxpt > particleList[j].pt[npt-1]) {
         music_message << "Error: called out of range pt in "
-             << "pt_and_rapidity_integrated_flow, " 
-             << maxpt << " > maximum " << particleList[j].pt[npt-1];
+             << "pt_and_rapidity_integrated_flow, "
+             << maxpt << " > maximum " << particleList[j].pt[npt-1]
+             << "maxrap = "<<maxrap<<"minrap = "<<minrap<<"vn[nharmonics[2]="
+             <<vn[nharmonics]<<"j= "<<j;
         music_message.flush("error");
         exit(1);
     }
@@ -1419,7 +1458,7 @@ void Freeze::pt_and_rapidity_integrated_flow(InitData *DATA, int number,
         music_message.flush("error");
         exit(1);
     }
-  
+
     // do rapidity-integral first
     double vnpt[nharmonics][2][etasize] = {};
     rapidity_integrated_flow(DATA, number, yflag,  minrap, maxrap, vnpt);
@@ -1454,13 +1493,13 @@ void Freeze::pt_and_rapidity_integrated_flow(InitData *DATA, int number,
             vn[n][0] = gsl_spline_eval(cosspline, minpt, cosacc);
             vn[n][1] = gsl_spline_eval(sinspline, minpt, sinacc);
         }
-    
+
         if (n != 0) {
             for (int i = 0; i < 2; i++) {
                 vn[n][i] /= vn[0][0];
             }
         }
-    
+
         // clean up
         gsl_spline_free (cosspline);
         gsl_interp_accel_free (cosacc);
@@ -1489,8 +1528,8 @@ void Freeze::OutputDifferentialFlowAtMidrapidity(
     fname += "vnpt_y-";
     tmpStr << number;
     fname += tmpStr.str();
-    fname += ".dat";  
-    
+    fname += ".dat";
+
     string fname2;
     stringstream tmpStr2;
     fname2 = "./outputs/";
@@ -1499,23 +1538,23 @@ void Freeze::OutputDifferentialFlowAtMidrapidity(
     fname2 += "vnpt_eta-";
     tmpStr2 << number;
     fname2 += tmpStr.str();
-    fname2 += ".dat"; 
-    
+    fname2 += ".dat";
+
     // Open output file for vn
     ofstream outfilevn;
     outfilevn.open(fname.c_str());
-    
+
     ofstream outfilevn2;
     outfilevn2.open(fname2.c_str());
-    
+
     outfilevn << "#pt  dN/ptdYdptdphi  v1cos  v1sin  v2cos  v2sin  "
               << "v3cos  v3sin  v4cos  v4sin  v5cos  v5sin  v6cos  v6sin  "
-              << "v7cos  v7sin" << endl;
-    
+              << "v7cos  v7sin    v1    v2    v3    v4    v5    v6    v7" << endl;
+
     outfilevn2 << "#pt  dN/ptdYdptdphi  v1cos  v1sin  v2cos  v2sin  "
                << "v3cos  v3sin  v4cos  v4sin  v5cos  v5sin  v6cos  v6sin  "
-               << "v7cos  v7sin" << endl;
-    
+               << "v7cos  v7sin    v1    v2    v3    v4    v5    v6    v7" << endl;
+
     double vn[nharmonics][2];
 
     double eta = 0.0;
@@ -1528,21 +1567,21 @@ void Freeze::OutputDifferentialFlowAtMidrapidity(
         //Output result
         outfilevn << pt;
         outfilevn << "  " << vn[0][0]/pt/(2*M_PI);
-        for (int i = 1;i<nharmonics;i++) 
-            for (int k =0;k<2;k++) 
+        for (int i = 1;i<nharmonics;i++)
+            for (int k =0;k<2;k++)
                 outfilevn << "  " << vn[i][k];
         outfilevn << endl;
- 
+
         pt_and_rapidity_integrated_flow(DATA, number, pt, pt, 0,
-                                        eta, eta, vn);  // pseudo-rapidity 
+                                        eta, eta, vn);  // pseudo-rapidity
         outfilevn2 << pt;
         outfilevn2 << "  " << vn[0][0]/pt/(2*M_PI);
-        for (int i = 1;i<nharmonics;i++) 
-            for (int k =0;k<2;k++) 
+        for (int i = 1;i<nharmonics;i++)
+            for (int k =0;k<2;k++)
                 outfilevn2 << "  " << vn[i][k];
         outfilevn2 << endl;
     }
-    
+
     // Close file
     outfilevn.close();
     outfilevn2.close();
@@ -1554,16 +1593,16 @@ void Freeze::OutputDifferentialFlowNearMidrapidity(
     // Define index j used in particleList[j]
     int j = partid[MHALF+number];
     int npt = particleList[j].npt;
-    
+
     double y_min = DATA->dNdyptdpt_y_min;
     double y_max = DATA->dNdyptdpt_y_max;
     double eta_min = DATA->dNdyptdpt_eta_min;
     double eta_max = DATA->dNdyptdpt_eta_max;
-    
+
     music_message << "Calculating flow near midrapidity for particle "
                   << number;
     music_message.flush("info");
-    
+
     //Set output file name
     stringstream fname;
     if (full) {
@@ -1573,7 +1612,7 @@ void Freeze::OutputDifferentialFlowNearMidrapidity(
         fname << "./outputs/vnpt-" << number << "_y_"
               << y_min << "_" << y_max << ".dat";
     }
-    
+
     stringstream fname2;
     if (full) {
         fname2 << "./outputs/Fvnpt-" << number << "_eta_"
@@ -1582,29 +1621,29 @@ void Freeze::OutputDifferentialFlowNearMidrapidity(
         fname2 << "./outputs/vnpt-" << number << "_eta_"
                << eta_min << "_" << eta_max << ".dat";
     }
-    
+
     //Open output file for vn
     ofstream outfilevn;
     outfilevn.open(fname.str().c_str());
-    
+
     ofstream outfilevn2;
     outfilevn2.open(fname2.str().c_str());
 
     //Set the format of the output
     outfilevn << "#pt  dN/ptdYdptdphi  v1cos  v1sin  v2cos  v2sin  "
               << "v3cos  v3sin  v4cos  v4sin  v5cos  v5sin  v6cos  v6sin  "
-              << "v7cos  v7sin" << endl;   // in rapidity
-    
+              << "v7cos  v7sin    v1    v2    v3    v4    v5    v6    v7" << endl;   // in rapidity
+
     outfilevn2 << "#pt  dN/ptdYdptdphi  v1cos  v1sin  v2cos  v2sin  "
                << "v3cos  v3sin  v4cos  v4sin  v5cos  v5sin  v6cos  v6sin  "
-               << "v7cos  v7sin" << endl;  // in pseudo-rapidity
+               << "v7cos  v7sin    v1    v2    v3    v4    v5    v6    v7" << endl;  // in pseudo-rapidity
 
     double vn[nharmonics][2];
-    
+
     // Loop over pT
     for (int ipt = 0;ipt < npt; ipt++) {
         double pt = particleList[j].pt[ipt];
-        
+
         pt_and_rapidity_integrated_flow(DATA, number, pt, pt, 1,
                                         y_min, y_max, vn);  // rapidity
 
@@ -1612,10 +1651,10 @@ void Freeze::OutputDifferentialFlowNearMidrapidity(
         outfilevn << pt;
         outfilevn << "  " << vn[0][0]/pt/(y_max - y_min)/(2*M_PI);
         for (int i = 1;i<nharmonics;i++)
-            for (int k =0;k<2;k++) 
+            for (int k =0;k<2;k++)
                 outfilevn << "  " << vn[i][k];
         outfilevn << endl;
-        
+
         // pseudo-rapidity
         pt_and_rapidity_integrated_flow(DATA, number, pt, pt, 0,
                                         eta_min, eta_max, vn);
@@ -1623,11 +1662,11 @@ void Freeze::OutputDifferentialFlowNearMidrapidity(
         outfilevn2 << pt;
         outfilevn2 << "  " << vn[0][0]/pt/(eta_max - eta_min)/(2*M_PI);
         for (int i = 1;i<nharmonics;i++)
-            for (int k =0;k<2;k++) 
+            for (int k =0;k<2;k++)
                 outfilevn2 << "  " << vn[i][k];
         outfilevn2 << endl;
     }
-    
+
     // Close file
     outfilevn.close();
     outfilevn2.close();
@@ -1642,7 +1681,7 @@ void Freeze::OutputIntegratedFlow_vs_y(
          << " < p_T < "
          << pT_max << " vs. pseudorapidity for particle " << number;
     music_message.flush("info");
-   
+
     // Set output file name
     stringstream fname;
     if (full) {
@@ -1652,7 +1691,7 @@ void Freeze::OutputIntegratedFlow_vs_y(
        fname << "./outputs/vn_y-"
              << number << "_pT_" << pT_min << "_" << pT_max << ".dat";
     }
-    
+
     stringstream fname2;
     if (full) {
        fname2 << "./outputs/Fvn_eta-"
@@ -1661,22 +1700,22 @@ void Freeze::OutputIntegratedFlow_vs_y(
        fname2 << "./outputs/vn_eta-"
               << number << "_pT_" << pT_min << "_" << pT_max << ".dat";
     }
-    
+
     // Open output file for vn
     ofstream outfilevn;
     outfilevn.open(fname.str().c_str());
-    
+
     ofstream outfilevn2;
     outfilevn2.open(fname2.str().c_str());
-    
+
     // header of the files
     outfilevn << "#y  dN/dy  v1cos  v1sin  v2cos  v2sin  v3cos  v3sin  "
-              << "v4cos  v4sin  v5cos  v5sin  v6cos  v6sin  v7cos  v7sin\n";
+              << "v4cos  v4sin  v5cos  v5sin  v6cos  v6sin  v7cos  v7sin    v1    v2    v3    v4    v5    v6    v7\n";
     outfilevn2 << "#eta  dN/deta  v1cos  v1sin  v2cos  v2sin  v3cos  v3sin  "
-               << "v4cos  v4sin  v5cos  v5sin  v6cos  v6sin  v7cos  v7sin\n";
-   
+               << "v4cos  v4sin  v5cos  v5sin  v6cos  v6sin  v7cos  v7sin    v1    v2    v3    v4    v5    v6    v7\n";
+
     double vn[nharmonics][2];
-    
+
     double y_min = DATA->dNdy_y_min;
     double y_max = DATA->dNdy_y_max;
     double eta_min = DATA->dNdy_eta_min;
@@ -1692,7 +1731,7 @@ void Freeze::OutputIntegratedFlow_vs_y(
         // rapidity
         pt_and_rapidity_integrated_flow(DATA, number, pT_min, pT_max, 1,
                                         y_local, y_local, vn);
-   
+
         // Output result
         outfilevn << scientific << setprecision(8) << y_local;
         for (int i = 0; i < nharmonics; i++) {
@@ -1701,11 +1740,11 @@ void Freeze::OutputIntegratedFlow_vs_y(
             }
         }
         outfilevn << endl;
-    
+
         // pseudo-rapidity
         pt_and_rapidity_integrated_flow(DATA, number, pT_min, pT_max, 0,
                                         eta_local, eta_local, vn);
-    
+
         outfilevn2 << scientific << setprecision(8) << eta_local;
         for (int i = 0; i < nharmonics; i++) {
             for (int k = 0; k < 2; k++) {
@@ -1714,7 +1753,7 @@ void Freeze::OutputIntegratedFlow_vs_y(
         }
         outfilevn2 << endl;
     }
-   
+
     // Close file
     outfilevn.close();
     outfilevn2.close();
@@ -1728,30 +1767,35 @@ void Freeze::Output_charged_IntegratedFlow(
          << pT_min << " < p_T < " << pT_max << " and "
          << eta_min << " < eta < " << eta_max << "...";
     music_message.flush("info");
-    
+
     // Set output file name
     stringstream fname;
-    fname << "./outputs/vnch_pT_" << pT_min << "_" << pT_max 
+    fname << "./outputs/vnch_pT_" << pT_min << "_" << pT_max
           << "_eta_" << eta_min << "_" << eta_max << ".dat";
-    
+
     // Open output file for vn
     ofstream outfile;
     outfile.open(fname.str().c_str());
-    
+
     // header of the files
-    outfile << "#dN/deta  v1cos  v1sin  v2cos  v2sin  v3cos  v3sin  "
-            << "v4cos  v4sin  v5cos  v5sin  v6cos  v6sin  v7cos  v7sin\n";
-    
+    outfile << "#dN/deta  v1cos  v1sin  v1  v2cos  v2sin  v2  v3cos  v3sin  v3"
+            << "v4cos  v4sin  v4  v5cos  v5sin  v5  v6cos  v6sin  v6  v7cos  v7sin  v7  shear/s\n";
+
     double dNch = get_Nch(DATA, pT_min, pT_max, 0, eta_min, eta_max);
+    double shear = DATA -> shear_to_s;
+    double exc2 = DATA -> exc2;
+    double exc3 = DATA -> exc3;
+    double exc4 = DATA -> exc4;
+    double exc5 = DATA -> exc5;
     outfile << scientific << setw(18) << setprecision(8) << dNch << "  ";
-    int max_flow_order = 7;
+    int max_flow_order = 8;
     for (int iorder = 1; iorder < max_flow_order; iorder++) {
         double *vn_temp = new double [2];
         get_vn_ch(DATA, pT_min, pT_max, 0, eta_min, eta_max, iorder, vn_temp);
-        outfile << vn_temp[0] << "  " << vn_temp[1] << "  ";
+        outfile << vn_temp[0] << "  " << vn_temp[1] << "  " << sqrt(pow(vn_temp[0],2)+pow(vn_temp[1],2)) << "  ";
         delete [] vn_temp;
     }
-    outfile << endl;
+    outfile << shear << " "<< exc2 << " " << exc3 << " " << exc4 << " " << exc5 << " " <<endl;
     outfile.close();
 }
 
@@ -1762,18 +1806,18 @@ void Freeze::Output_charged_hadrons_eta_differential_spectra(
     music_message.flush("info");
     stringstream tmpStr;
     tmpStr << "./outputs/vnchdeta_pT_" << pT_min << "_" << pT_max << ".dat";
-    
+
     ofstream outfile;
     outfile.open(tmpStr.str().c_str(),ios::trunc);
-    
-    outfile << "#eta  dNch/deta  v1cos  v1sin  v2cos  v2sin  v3cos  v3sin  "
-            << "v4cos  v4sin  v5cos  v5sin  v6cos  v6sin  v7cos  v7sin\n";
+
+    outfile << "#eta  dNch/deta  v1cos  v1sin  v1 v2cos  v2sin  v2  v3cos  v3sin  v3"
+            << "v4cos  v4sin  v4  v5cos  v5sin  v5  v6cos  v6sin  v6  v7cos  v7sin   v7\n";
 
     double eta_min = DATA->dNdy_eta_min;
     double eta_max = DATA->dNdy_eta_max;
     int nrap = DATA->dNdy_nrap;
     double deta = (eta_max - eta_min)/(nrap - 1);
-    int max_flow_order = 7;
+    int max_flow_order = 8;
     for (int ieta = 0; ieta < nrap; ieta++) {
         double eta_local = eta_min + ieta*deta;
         double dNch = get_Nch(DATA, pT_min, pT_max, 0, eta_local, eta_local);
@@ -1782,7 +1826,7 @@ void Freeze::Output_charged_hadrons_eta_differential_spectra(
             double *vn_temp = new double [2];
             get_vn_ch(DATA, pT_min, pT_max, 0, eta_local, eta_local,
                       iorder, vn_temp);
-            outfile << vn_temp[0] << "  " << vn_temp[1] << "  ";
+            outfile << vn_temp[0] << "  " << vn_temp[1] << "  "<< sqrt(pow(vn_temp[0],2)+pow(vn_temp[1],2)) << "  ";
             delete [] vn_temp;
         }
         outfile << endl;
@@ -1806,11 +1850,11 @@ void Freeze::Output_charged_hadrons_pT_differential_spectra(
     ofstream outfile;
     outfile.open(tmpStr.str().c_str(), ios::trunc);
     // header
-    outfile << "#pT  dNch/detapTdpTdphi  v1cos  v1sin  v2cos  v2sin  "
-            << "v3cos  v3sin  v4cos  v4sin  v5cos  v5sin  v6cos  v6sin  "
-            << "v7cos  v7sin" << endl;
+    outfile << "#pT  dNch/detapTdpTdphi  v1cos  v1sin  v1 v2cos  v2sin  v2"
+            << "v3cos  v3sin  v3  v4cos  v4sin  v4  v5cos  v5sin  v5  v6cos  v6sin  v6"
+            << "v7cos  v7sin   v7" << endl;
 
-    int max_flow_order = 7;
+    int max_flow_order = 8;
     for (int ipT = 0; ipT < npT; ipT++) {
         double pT_local = pT_min + ipT*dpT;
         double dNch = get_Nch(DATA, pT_local, pT_local, 0, eta_min, eta_max);
@@ -1819,7 +1863,7 @@ void Freeze::Output_charged_hadrons_pT_differential_spectra(
             double *vn_temp = new double [2];
             get_vn_ch(DATA, pT_local, pT_local, 0, eta_min, eta_max,
                       iorder, vn_temp);
-            outfile << vn_temp[0] << "  " << vn_temp[1] << "  ";
+            outfile << vn_temp[0] << "  " << vn_temp[1] << "  " << sqrt(pow(vn_temp[0],2)+pow(vn_temp[1],2)) << "  ";
             delete [] vn_temp;
         }
         outfile << endl;
@@ -1837,7 +1881,7 @@ double Freeze::get_N(InitData *DATA, int number, double minpt, double maxpt,
 }
 
 // Return charged hadron yield in specified range of phase space
-// You'll almost certainly want to set yflat=0 to calculate 
+// You'll almost certainly want to set yflat=0 to calculate
 // over a fixed range in eta
 // if minrap==maxrap, returns dN/eta.  If minpt==maxpt, dN/dpt.
 // If both, dN/dpt/deta.  Otherwise, total yield N
@@ -1904,7 +1948,7 @@ double Freeze::get_meanpt(InitData *DATA, int number,
         music_message.flush("error");
         exit(1);
     }
-  
+
     double ptdndpt[ptsize];
     double dndpt[ptsize];
     for (int ipt = 0; ipt < npt; ipt++) {
@@ -1915,19 +1959,19 @@ double Freeze::get_meanpt(InitData *DATA, int number,
     gsl_interp_accel *numacc = gsl_interp_accel_alloc ();
     gsl_spline *numspline = gsl_spline_alloc (gsl_interp_linear, npt);
     gsl_spline_init (numspline, particleList[j].pt ,ptdndpt , npt);
-    
+
     gsl_interp_accel *denacc = gsl_interp_accel_alloc ();
     gsl_spline *denspline = gsl_spline_alloc (gsl_interp_linear, npt);
     gsl_spline_init (denspline, particleList[j].pt ,dndpt , npt);
-    
+
     double num = gsl_spline_eval_integ(numspline, minpt, maxpt, numacc);
     double den = gsl_spline_eval_integ(denspline, minpt, maxpt, denacc);
-    
+
     gsl_spline_free (numspline);
     gsl_interp_accel_free (numacc);
     gsl_spline_free (denspline);
     gsl_interp_accel_free (denacc);
-    
+
     return num/den;
 }
 
@@ -2014,7 +2058,7 @@ void Freeze::weighted_v1(InitData *DATA, int number,
         music_message.flush("error");
         exit(1);
     }
-  
+
     // start by finding <pt> and <pt^2>
     double ptptdndpt[ptsize];
     double ptdndpt[ptsize];
@@ -2029,33 +2073,33 @@ void Freeze::weighted_v1(InitData *DATA, int number,
         ptdndpt[ipt] = pt*dndpt[ipt];
         ptptdndpt[ipt] = pt*pt*dndpt[ipt];
     }
-  
+
     gsl_interp_accel *numacc = gsl_interp_accel_alloc ();
     gsl_spline *numspline = gsl_spline_alloc (gsl_interp_linear, npt);
     gsl_spline_init (numspline, particleList[j].pt ,ptdndpt , npt);
-    
+
     gsl_interp_accel *num2acc = gsl_interp_accel_alloc ();
     gsl_spline *num2spline = gsl_spline_alloc (gsl_interp_linear, npt);
     gsl_spline_init (num2spline, particleList[j].pt, ptptdndpt , npt);
-    
+
     gsl_interp_accel *denacc = gsl_interp_accel_alloc ();
     gsl_spline *denspline = gsl_spline_alloc (gsl_interp_linear, npt);
     gsl_spline_init (denspline, particleList[j].pt ,dndpt , npt);
-    
+
     double num2 = gsl_spline_eval_integ(num2spline, minpt, maxpt, num2acc);
     double num = gsl_spline_eval_integ(numspline, minpt, maxpt, numacc);
     double den = gsl_spline_eval_integ(denspline, minpt, maxpt, denacc);
-    
+
     gsl_spline_free (numspline);
     gsl_interp_accel_free (numacc);
     gsl_spline_free (num2spline);
     gsl_interp_accel_free (num2acc);
     gsl_spline_free (denspline);
     gsl_interp_accel_free (denacc);
-    
+
     double meanpt = num/den;
     double meanpt2 = num2/den;
-    
+
     // next calculate integrated v1 and psi1 with weight pt - <pt^2>/<pt>
     double v1cos[ptsize];
     double v1sin[ptsize];
@@ -2063,7 +2107,7 @@ void Freeze::weighted_v1(InitData *DATA, int number,
     for (int ipt = 0; ipt < npt; ipt++) {
         double pt = particleList[j].pt[ipt];
         double weight = (pt - meanpt2/meanpt)*dndpt[ipt];
-        
+
         double v1;
         double psi1;
         double * vntemp = new double [2];
@@ -2082,22 +2126,22 @@ void Freeze::weighted_v1(InitData *DATA, int number,
         v1den[ipt] = weight;
         delete [] vntemp;
     }
-    
+
     gsl_spline_init (numspline, particleList[j].pt ,v1cos , npt);
     gsl_spline_init (num2spline, particleList[j].pt, v1sin , npt);
     gsl_spline_init (denspline, particleList[j].pt ,v1den , npt);
-    
+
     num2 = gsl_spline_eval_integ(num2spline, minpt, maxpt, numacc);
     num = gsl_spline_eval_integ(numspline, minpt, maxpt, numacc);
     den = gsl_spline_eval_integ(denspline, minpt, maxpt, denacc);
-    
+
     gsl_spline_free (numspline);
     gsl_interp_accel_free (numacc);
     gsl_spline_free (num2spline);
     gsl_interp_accel_free (num2acc);
     gsl_spline_free (denspline);
     gsl_interp_accel_free (denacc);
-  
+
     vn[0] = sqrt(num*num+num2*num2)/den;
     vn[1] = atan2(num2,num);
 }
@@ -2154,7 +2198,7 @@ void Freeze::load_deltaf_qmu_coeff_table_14mom(string filename) {
 
     deltaf_coeff_tb_14mom_DPi = new double* [deltaf_coeff_table_14mom_length_T];
     deltaf_coeff_tb_14mom_BPi = new double* [deltaf_coeff_table_14mom_length_T];
-    deltaf_coeff_tb_14mom_BPitilde = 
+    deltaf_coeff_tb_14mom_BPitilde =
                             new double* [deltaf_coeff_table_14mom_length_T];
     deltaf_coeff_tb_14mom_DV = new double* [deltaf_coeff_table_14mom_length_T];
     deltaf_coeff_tb_14mom_BV = new double* [deltaf_coeff_table_14mom_length_T];
@@ -2179,9 +2223,9 @@ void Freeze::load_deltaf_qmu_coeff_table_14mom(string filename) {
     for (int i = 0; i < deltaf_coeff_table_14mom_length_T; i++) {
         for (int j = 0; j < deltaf_coeff_table_14mom_length_mu; j++) {
             table >> dummy >> dummy >> deltaf_coeff_tb_14mom_DPi[i][j]
-                  >> deltaf_coeff_tb_14mom_BPi[i][j] 
+                  >> deltaf_coeff_tb_14mom_BPi[i][j]
                   >> deltaf_coeff_tb_14mom_BPitilde[i][j]
-                  >> deltaf_coeff_tb_14mom_DV[i][j] 
+                  >> deltaf_coeff_tb_14mom_DV[i][j]
                   >> deltaf_coeff_tb_14mom_BV[i][j]
                   >> deltaf_coeff_tb_14mom_Bpi_shear[i][j];
         }
@@ -2220,7 +2264,7 @@ double Freeze::get_deltaf_qmu_coeff(double T, double muB) {
     if (idx_T > deltaf_qmu_coeff_table_length_T - 2) {
         return(1e30);
     }
-    
+
     // avoid underflow: return a large number so that delta f = 0
     if (idx_mu < 0) {
         return(1e30);
@@ -2228,13 +2272,13 @@ double Freeze::get_deltaf_qmu_coeff(double T, double muB) {
     if (idx_T < 0) {
         return(1e30);
     }
-    
+
     double f1 = deltaf_qmu_coeff_tb[idx_T][idx_mu];
     double f2 = deltaf_qmu_coeff_tb[idx_T][idx_mu+1];
     double f3 = deltaf_qmu_coeff_tb[idx_T+1][idx_mu+1];
     double f4 = deltaf_qmu_coeff_tb[idx_T+1][idx_mu];
 
-    double coeff = f1*(1. - x_fraction)*(1. - y_fraction) 
+    double coeff = f1*(1. - x_fraction)*(1. - y_fraction)
                    + f2*(1. - x_fraction)*y_fraction
                    + f3*x_fraction*y_fraction
                    + f4*x_fraction*(1. - y_fraction);
@@ -2265,18 +2309,18 @@ double Freeze::get_deltaf_coeff_14moments(double T, double muB, double type) {
     } else if (type == 5) {
        deltaf_table = deltaf_coeff_tb_14mom_Bpi_shear;
     } else {
-       music_message << "Freeze::get_deltaf_coeff_14moments: unknown type: " 
+       music_message << "Freeze::get_deltaf_coeff_14moments: unknown type: "
                      << type;
        music_message.flush("error");
        exit(-1);
     }
-    
+
     double f1 = deltaf_table[idx_T][idx_mu];
     double f2 = deltaf_table[idx_T][idx_mu+1];
     double f3 = deltaf_table[idx_T+1][idx_mu+1];
     double f4 = deltaf_table[idx_T+1][idx_mu];
 
-    double coeff = f1*(1. - x_fraction)*(1. - y_fraction) 
+    double coeff = f1*(1. - x_fraction)*(1. - y_fraction)
                    + f2*(1. - x_fraction)*y_fraction
                    + f3*x_fraction*y_fraction
                    + f4*x_fraction*(1. - y_fraction);
@@ -2293,13 +2337,13 @@ void Freeze::getbulkvisCoefficients(double Tdec, double* bulkvisCoefficients) {
         // parameterization for mu = 0
         // B0[fm^3/GeV^3]
         bulkvisCoefficients[0] = (
-                exp(-15.04512474*Tdec_fm + 11.76194266)/pow(hbarc, 3)); 
+                exp(-15.04512474*Tdec_fm + 11.76194266)/pow(hbarc, 3));
         // D0 [fm^3/GeV^2]
         bulkvisCoefficients[1] = (
-                exp( -12.45699277*Tdec_fm + 11.4949293)/hbarc/hbarc);  
+                exp( -12.45699277*Tdec_fm + 11.4949293)/hbarc/hbarc);
         // E0 [fm^3/GeV^3]
         bulkvisCoefficients[2] = (
-                -exp(-14.45087586*Tdec_fm + 11.62716548)/pow(hbarc, 3));  
+                -exp(-14.45087586*Tdec_fm + 11.62716548)/pow(hbarc, 3));
     } else if(bulk_deltaf_kind == 1) {     // relaxation type 1
         // parameterization from JF
         // A Polynomial fit to each coefficient -- temperature in fm^-1

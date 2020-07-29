@@ -1,0 +1,59 @@
+mode 1
+
+reset_dtau_use_CFL_condition 0
+
+
+Initial_profile 31
+
+
+
+Target Pb
+Projectile Pb
+
+binary_collision_scaling_fraction 0.05
+
+Eta_plateau_size 20
+Initial_time_tau_0 1.0
+boost_invariant 1
+initialize_with_entropy 0
+
+EOS_to_use 2
+epsilon_freeze 0.18
+Viscosity_Flag_Yes_1_No_0 1
+Include_Shear_Visc_Yes_1_No_0 1
+Shear_to_S_ratio 00
+
+freeze_surface_in_binary 0
+Delta_Tau 0.1
+Eta_grid_size 8.0
+Y_grid_size_in_fm 25
+X_grid_size_in_fm 25
+Grid_size_in_eta 100
+Grid_size_in_y 125
+Grid_size_in_x 125
+
+freeze_out_method 4
+number_of_particles_to_include	320
+particle_spectrum_to_compute	0
+pseudofreeze 1
+phi_steps 24
+pseudo_steps 20
+max_pseudorapidity 2.5
+max_pt 3.0
+min_pt 0.2
+pt_steps 50
+max_delta_eta2 0.1
+MassTolerance 0.1
+
+a_ecc 
+a1_ecc 0
+a2_ecc .10
+a3_ecc .10
+a4_ecc .10
+a5_ecc 0
+a6_ecc 0
+a7_ecc 0
+norm_ecc 30
+rho0 0.160423
+
+EndOfData

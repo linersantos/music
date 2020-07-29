@@ -32,7 +32,7 @@ Freeze::Freeze(InitData* DATA_in) {
     music_message << "number of particle species to compute = " << particleMax;
     music_message.flush("info");
     bulk_deltaf_kind = 1;
-    
+
     // read in tables for delta f coefficients
     if (DATA_ptr->turn_on_diff == 1 && DATA_ptr->include_deltaf_qmu == 1) {
         if (DATA_ptr->deltaf_14moments == 1) {
@@ -107,7 +107,7 @@ void Freeze::read_particle_PCE_mu(InitData* DATA, EOS *eos) {
     music_message << "Determining chemical potentials at freeze out "
                   << "energy density " << ef << " GeV/fm^3.";
     music_message.flush("info");
-    
+
     // get environment path
     const char* EOSPATH = "HYDROPROGRAMPATH";
     char * pre_envPath= getenv(EOSPATH);
@@ -128,9 +128,9 @@ void Freeze::read_particle_PCE_mu(InitData* DATA, EOS *eos) {
     } else if (DATA->whichEOS == 6) {
         mu_name = envPath + "/EOS/s95p-PCE165-v0/s95p-PCE165-v0_pichem1.dat";
     }
-    music_message << "Reading chemical potentials from file " << mu_name; 
+    music_message << "Reading chemical potentials from file " << mu_name;
     music_message.flush("info");
-    
+
     ifstream mu_file(mu_name.c_str());
     if (!mu_file.is_open()) {
         music_message << "file " << mu_name << "not found. Exiting...";
@@ -145,8 +145,8 @@ void Freeze::read_particle_PCE_mu(InitData* DATA, EOS *eos) {
 
     mu_file >> EPP1 >> deltaEPP1 >> NEPP1;
     mu_file >> numStable;
-      
-    // chemical potential for every stable particle 
+
+    // chemical potential for every stable particle
     chemPot = Util::mtx_malloc(numStable+1, NEPP1+1);
 
     for (int j = NEPP1-1; j >= 0; j--) {
@@ -155,7 +155,7 @@ void Freeze::read_particle_PCE_mu(InitData* DATA, EOS *eos) {
         }
     }
     mu_file.close();
-    
+
     double frace;
     int ie1, ie2;
     if (ef < EPP1) {
@@ -165,16 +165,16 @@ void Freeze::read_particle_PCE_mu(InitData* DATA, EOS *eos) {
     } else {
         ie1 = floor((ef-EPP1)/deltaEPP1);
         ie2 = floor((ef-EPP1)/deltaEPP1+1);
-        frace = (ef-(ie1*deltaEPP1+EPP1))/deltaEPP1; 
+        frace = (ef-(ie1*deltaEPP1+EPP1))/deltaEPP1;
     }
-      
+
     if (ie1 > NEPP1) {
         music_message.error("ERROR in ReadParticleData. out of range.");
         music_message << "ie1=" << ie1 << ",NEPP1=" << NEPP1;
         music_message.flush("error");
         exit(0);
     }
-    
+
     if (ie2 > NEPP1) {
         music_message.error("ERROR in ReadParticleData. out of range.");
         music_message << "ie2=" << ie2 << ",NEPP1=" << NEPP1;
@@ -186,22 +186,22 @@ void Freeze::read_particle_PCE_mu(InitData* DATA, EOS *eos) {
     double mu[numStable+1];
     music_message << "num_of_stable_particles = " << numStable;
     music_message.flush("info");
-    
+
     for(int i = 1; i <= numStable; i++) {
         pa = chemPot[i-1][ie1];
         pb = chemPot[i-1][ie2];
-      
+
         if (ef < EPP1) {
             mu[i] = pa*(frace);
         } else {
             mu[i] = pa*(1-frace) + pb*frace;
         }
     }
-     
+
     for (int i = 0; i < DATA->NumberOfParticlesToInclude; i++) {
         particleList[i].muAtFreezeOut = 0.;
     }
-      
+
     if (DATA->NumberOfParticlesToInclude >= 8) {
         for(int i = 1; i <= 8; i++) {
             particleList[i].muAtFreezeOut = mu[i];
@@ -212,7 +212,7 @@ void Freeze::read_particle_PCE_mu(InitData* DATA, EOS *eos) {
         music_message.flush("error");
         exit(1);
     }
-    
+
     if (DATA->whichEOS != 6) {
         if (DATA->NumberOfParticlesToInclude >= 12)
             particleList[12].muAtFreezeOut = mu[9];
@@ -258,7 +258,7 @@ void Freeze::read_particle_PCE_mu(InitData* DATA, EOS *eos) {
 
         if (DATA->NumberOfParticlesToInclude>=110)
             particleList[110].muAtFreezeOut = mu[28];
-      
+
         if (DATA->NumberOfParticlesToInclude>=111)
             particleList[111].muAtFreezeOut = mu[29];
 
@@ -275,7 +275,7 @@ void Freeze::read_particle_PCE_mu(InitData* DATA, EOS *eos) {
             particleList[170].muAtFreezeOut = mu[34];
         if (DATA->NumberOfParticlesToInclude>=171)
             particleList[171].muAtFreezeOut = mu[35];
-    } else {   
+    } else {
         if (DATA->NumberOfParticlesToInclude>=17)
             particleList[17].muAtFreezeOut = mu[9];
         if (DATA->NumberOfParticlesToInclude>=18)
@@ -361,13 +361,13 @@ void Freeze::read_particle_PCE_mu(InitData* DATA, EOS *eos) {
 
 void Freeze::ReadParticleData(InitData *DATA, EOS *eos) {
     // read in particle and decay information from file:
-    partid = new int[MAXINTV]; 
+    partid = new int[MAXINTV];
     music_message.info("reading particle data");
     // open particle data file:
     const char* EOSPATH = "HYDROPROGRAMPATH";
     char * pre_envPath= getenv(EOSPATH);
     std::string envPath;
-
+//cout<<" "<<EOSPATH;
     if (pre_envPath == 0) {
 	    envPath=".";
     } else {
@@ -385,8 +385,8 @@ void Freeze::ReadParticleData(InitData *DATA, EOS *eos) {
     p_file = fopen(p_name.c_str(), "r");
     checkForReadError(p_file, p_name.c_str());
 
-    for (int k = 0; k < MAXINTV; k++) 
-        partid[k] = -1; 
+    for (int k = 0; k < MAXINTV; k++)
+        partid[k] = -1;
 
     if (DATA->echo_level > 5) {
         music_message << "size_of_Particle= " << sizeof(Particle)/1024/1024
@@ -425,7 +425,7 @@ void Freeze::ReadParticleData(InitData *DATA, EOS *eos) {
         int h;
         for(int k = 0; k < particleList[i].decays; k++) {
             h = fscanf(p_file, "%i%i%lf%i%i%i%i%i",
-                       &decay[j].reso, &decay[j].numpart, &decay[j].branch, 
+                       &decay[j].reso, &decay[j].numpart, &decay[j].branch,
                        &decay[j].part[0], &decay[j].part[1], &decay[j].part[2],
                        &decay[j].part[3], &decay[j].part[4]);
             if (h != 8) {
@@ -433,12 +433,12 @@ void Freeze::ReadParticleData(InitData *DATA, EOS *eos) {
                 exit(0);
             }
             if (decay[j].numpart == 1) {
-                // "decays" into one particle, i.e. is stable 
+                // "decays" into one particle, i.e. is stable
                 particleList[i].stable = 1;
             }
             j++;   // increase the decay counting variable "j" by 1
         }
-    
+
         // include anti-baryons (there are none in the file)
         if (particleList[i].baryon != 0) {
             i++;
@@ -472,14 +472,14 @@ void Freeze::ReadParticleData(InitData *DATA, EOS *eos) {
     if (DATA->whichEOS > 2 && DATA->whichEOS < 6) {
         read_particle_PCE_mu(DATA, eos);
     }
-      
+
     music_message.info("Done reading particle data.");
 }
 
 
 void Freeze::ReadFreezeOutSurface(InitData *DATA) {
     music_message.info("reading freeze-out surface");
-    
+
     ostringstream surfdat_stream;
     surfdat_stream << "./surface.dat";
 
@@ -534,7 +534,7 @@ void Freeze::ReadFreezeOutSurface(InitData *DATA) {
             temp_cell.T_f                  = array[13];
             temp_cell.mu_B                 = array[14];
             temp_cell.eps_plus_p_over_T_FO = array[15];
-            
+
             temp_cell.W[0][0] = array[16];
             temp_cell.W[0][1] = array[17];
             temp_cell.W[0][2] = array[18];
@@ -557,11 +557,11 @@ void Freeze::ReadFreezeOutSurface(InitData *DATA) {
             // position in (tau, x, y, eta)
             surfdat >> temp_cell.x[0] >> temp_cell.x[1]
                     >> temp_cell.x[2] >> temp_cell.x[3];
-            
+
             // hypersurface vector in (tau, x, y, eta)
             surfdat >> temp_cell.s[0] >> temp_cell.s[1]
                     >> temp_cell.s[2] >> temp_cell.s[3];
-            
+
             // flow velocity in (tau, x, y, eta)
             surfdat >> temp_cell.u[0] >> temp_cell.u[1]
                     >> temp_cell.u[2] >> temp_cell.u[3];
