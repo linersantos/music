@@ -50,7 +50,7 @@ a1_ecc 0
 a2_ecc .10
 a3_ecc .10
 a4_ecc .10
-a5_ecc .10
+a5_ecc 0
 a6_ecc 0
 a7_ecc 0
 norm_ecc 30
